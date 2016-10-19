@@ -1,5 +1,7 @@
 package android.intellhome.utils;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,11 +10,33 @@ import java.util.regex.Pattern;
  */
 public class RegExp {
 
-    static String regex = "^201\\d\\s\\d+\\s\\d+ ";
+    static String regex = "^(201\\d) (\\d\\d?) (\\d\\d?\\s?)$";
 
+    
     public static boolean isExpFormatCorrect(String exp) {
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(exp);
-        return m.find();
+        return Pattern.compile(regex).matcher(exp).find();
+    }
+
+    /**
+     * Convert date in the string form "yyyy mm dd" into GregorianCalendar.
+     * Since this method is invoked only after {@code isExpFormatCorrect} returns
+     * true, it is unnecessary to check against null.
+     *
+     * @param date date acquired from EditText
+     * @return GregorianCalendar object that denotes time
+     */
+    public static GregorianCalendar text2Date(String date) {
+        Matcher m = Pattern.compile(regex).matcher(date);
+        if (m.find()) {
+            int year = string2Int(m.group(1));
+            int month = string2Int(m.group(2)) - 1;
+            int day = string2Int(m.group(3));
+            return new GregorianCalendar(year, month, day);
+        } else
+            return null;
+    }
+
+    private static int string2Int(String text) {
+        return Integer.valueOf(text);
     }
 }
