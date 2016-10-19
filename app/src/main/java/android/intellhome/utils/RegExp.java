@@ -12,7 +12,11 @@ public class RegExp {
 
     static String regex = "^(201\\d) (\\d\\d?) (\\d\\d?\\s?)$";
 
-    
+    /**
+     * Test against user date input to see whether it follows correct format.
+     * @param exp date sttring
+     * @return return true if the input follows format
+     */
     public static boolean isExpFormatCorrect(String exp) {
         return Pattern.compile(regex).matcher(exp).find();
     }

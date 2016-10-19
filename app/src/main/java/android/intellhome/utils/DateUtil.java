@@ -7,6 +7,12 @@ import java.util.GregorianCalendar;
  */
 public class DateUtil {
 
+    /**
+     * Calculate the days of difference between two dates.
+     * @param startDate start date for query
+     * @param endDate end dat efor query
+     * @return days of difference
+     */
     public static int calculateDateDiff(String startDate, String endDate) {
         GregorianCalendar startCalendar = RegExp.text2Date(startDate);
         GregorianCalendar endCalendar = RegExp.text2Date(endDate);
