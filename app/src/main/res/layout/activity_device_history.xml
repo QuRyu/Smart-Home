@@ -34,13 +34,19 @@
                 android:gravity="center"
                 android:textSize="20sp"/>
 
-            <EditText
-                android:id="@+id/et_startDate"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:layout_weight="0.8"
-                android:layout_height="match_parent"
-                android:text="12321"
-                android:inputType="datetime"/>
+                android:layout_marginBottom="8dp">
+                <EditText
+                    android:id="@+id/et_startDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="12321"
+                    android:inputType="datetime"/>
+            </android.support.design.widget.TextInputLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -56,13 +62,21 @@
                 android:textSize="20sp"
                 android:layout_weight="0.3"/>
 
-            <EditText
-                android:id="@+id/et_endDate"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:layout_weight="0.8"
-                android:inputType="datetime"
-                android:imeOptions="actionSend"/>
+                android:layout_marginBottom="8dp">
+
+                <EditText
+                    android:id="@+id/et_endDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="datetime"
+                    android:imeOptions="actionSend"/>
+
+            </android.support.design.widget.TextInputLayout>
         </LinearLayout>
         </LinearLayout>
 

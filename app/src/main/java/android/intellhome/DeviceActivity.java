@@ -3,6 +3,8 @@ package android.intellhome;
 import android.content.Intent;
 import android.graphics.Color;
 import android.intellhome.utils.RegExp;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -19,8 +21,6 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.AxisValueFormatter;
-import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,25 +60,13 @@ public class DeviceActivity extends AppCompatActivity {
         });
 
         mBt_search = (Button) findViewById(R.id.bt_search);
+        mET_startDate = (EditText) findViewById(R.id.et_startDate);
+        mET_endDate = (EditText) findViewById(R.id.et_endDate);
 
         mChart = (LineChart) findViewById(R.id.linechart);
 
         mChart.setDragEnabled(false);
         mChart.setDescription("");
-
-        mChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-            @Override
-            public void onValueSelected(Entry e, Highlight h) {
-                
-                mChart.highlightValue(h);
-            }
-
-            @Override
-            public void onNothingSelected() {
-
-            }
-        });
-
 
         XAxis xAxis = mChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -121,28 +109,47 @@ public class DeviceActivity extends AppCompatActivity {
         return random.nextFloat() * ITEM_COUNT;
     }
 
-    private void checkTextAndSearch() {
-        boolean isStartDateCorrect = false;
-        boolean isEndDateCorect = false;
+    private void checkTextAndQuery() {
         String startDate = mET_startDate.getText().toString();
         String endDate = mET_endDate.getText().toString();
 
-        if ((isStartDateCorrect = RegExp.isExpFormatCorrect(startDate))
-                && (isEndDateCorect = RegExp.isExpFormatCorrect(endDate))) {
-            // send Http request asynchronously
-            // get the result, render view
-        } else {
-            // tell users which EditText is incorrect
+        if (checkText(startDate, endDate)) {
+            // run the query
+            queryHistory();
         }
+
     }
 
+    private boolean checkText(String startDate, String endDate) {
+        boolean isStartDateCorrect = RegExp.isExpFormatCorrect(startDate);
+        boolean isEndDateCorect = RegExp.isExpFormatCorrect(endDate);
 
+        View focusView = null;
 
+        if (!isStartDateCorrect || !isEndDateCorect) { // at least the format of one EditText is wong
+            // tell users which EditText is incorrect
+            if (!isStartDateCorrect) {
+                mET_startDate.setError(getString(R.string.field_required_startDate));
+                focusView = mET_startDate;
+            }
+            if (!isEndDateCorect) {
+                mET_endDate.setError(getString(R.string.filed_required_endDate));
+                focusView = mET_endDate;
+            }
+            focusView.requestFocus();
+        }
+
+        return isStartDateCorrect && isEndDateCorect;
+    }
+
+    private void queryHistory() {}
+
+    private void invalidateChart() {}
 
     private View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            checkTextAndSearch();
+            checkTextAndQuery();
         }
     };
 
@@ -151,10 +158,18 @@ public class DeviceActivity extends AppCompatActivity {
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_SEND) {
-                checkTextAndSearch();
+                checkTextAndQuery();
                 handled = true;
             }
             return handled;
+        }
+    };
+
+    public static Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            
         }
     };
 }
