@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -14,8 +15,8 @@ import java.util.List;
 
 public class DeviceActivity extends AppCompatActivity {
     // TODO: 18/10/2016 Http request
-    // TODO: 18/10/2016  
-    LineChart chart;
+    // TODO: 18/10/2016 improve mChart
+    LineChart mChart;
 
     List<Entry> entries = new ArrayList<>();
 
@@ -27,13 +28,16 @@ public class DeviceActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
 
-        chart = (LineChart) findViewById(R.id.linechart);
+        mChart = (LineChart) findViewById(R.id.linechart);
         entries.add(new Entry(1.0f, 2.0f));
         entries.add(new Entry(2.0f, 3.0f));
         LineDataSet dataSet = new LineDataSet(entries, "Label");
-        chart.setData(new LineData(dataSet));
-        chart.invalidate();
+        mChart.setData(new LineData(dataSet));
+        mChart.invalidate();
 
-
+        XAxis leftAxis = mChart.getXAxis();
+        leftAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        leftAxis.setGranularity(1f);
+        leftAxis.setAxisMinValue(0f);
     }
 }

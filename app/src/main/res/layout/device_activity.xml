@@ -9,52 +9,55 @@
 
     <LinearLayout
         android:id="@+id/datelayou"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="15dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp">
 
-       <LinearLayout
-           android:layout_width="0dp"
-           android:layout_height="match_parent"
-           android:orientation="horizontal"
-           android:layout_weight="0.2">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="40dp"
+            <TextView
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:src="@mipmap/ic_launcher"/>
+                android:layout_weight="0.3"
+                android:text="@string/start_date"
+                android:gravity="center"
+                android:textSize="20sp"/>
 
-            <LinearLayout
-                android:layout_width="120dp"
-                android:orientation="vertical"
-                android:layout_height="match_parent">
+            <EditText
+                android:id="@+id/et_startDate"
+                android:layout_width="0dp"
+                android:layout_weight="0.8"
+                android:layout_height="match_parent"
+                android:text="12321"
+                android:inputType="datetime"/>
+        </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tv_deviceName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/device_name_switch"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/tv_ip"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:gravity="center"
-                    android:text="192"/>
-            </LinearLayout>
-       </LinearLayout>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="@string/end_date"
+                android:gravity="center"
+                android:textSize="20sp"
+                android:layout_weight="0.3"/>
 
-
-        <ToggleButton
-            android:layout_marginEnd="5dp"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.06"/>
+            <EditText
+                android:id="@+id/et_endDate"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.8"
+                android:inputType="datetime"/>
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
