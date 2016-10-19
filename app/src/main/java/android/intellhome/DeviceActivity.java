@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -27,6 +28,10 @@ import java.util.List;
 import java.util.Random;
 
 public class DeviceActivity extends AppCompatActivity {
+
+    public final String TAG = this.getClass().getSimpleName();
+
+
     // mock, to be deleted later
     Random random = new Random();
     private static final int ITEM_COUNT = 12;
@@ -50,6 +55,8 @@ public class DeviceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_history);
+
+        Log.i(TAG, "onCreate method init");
 
         // to be deleted later
         ((Button) findViewById(R.id.bt_history)).setOnClickListener(new View.OnClickListener() {
@@ -110,13 +117,17 @@ public class DeviceActivity extends AppCompatActivity {
     }
 
     private void checkTextAndQuery() {
+        Log.i(TAG, "start to check text");
         String startDate = mET_startDate.getText().toString();
         String endDate = mET_endDate.getText().toString();
 
         if (checkText(startDate, endDate)) {
             // run the query
+            Log.i(TAG, "text check passed");
             queryHistory();
-        }
+        } else
+            Log.i(TAG, "text check failed");
+
 
     }
 
@@ -142,13 +153,16 @@ public class DeviceActivity extends AppCompatActivity {
         return isStartDateCorrect && isEndDateCorect;
     }
 
-    private void queryHistory() {}
+    private void queryHistory() {
+
+    }
 
     private void invalidateChart() {}
 
     private View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.i(TAG, "query button clicked");
             checkTextAndQuery();
         }
     };
@@ -158,6 +172,7 @@ public class DeviceActivity extends AppCompatActivity {
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_SEND) {
+                Log.i(TAG, "query started by action of EditText");
                 checkTextAndQuery();
                 handled = true;
             }
@@ -165,11 +180,4 @@ public class DeviceActivity extends AppCompatActivity {
         }
     };
 
-    public static Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            
-        }
-    };
 }
