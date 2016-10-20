@@ -31,7 +31,7 @@ import java.util.Random;
 
 public class DeviceActivity extends AppCompatActivity {
 
-    public final String TAG = this.getClass().getSimpleName();
+    public static final String TAG = "DeviceActivity";
 
 
     // mock, to be deleted later

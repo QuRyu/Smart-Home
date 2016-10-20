@@ -7,7 +7,7 @@ import android.media.Image;
  */
 public class DeviceHistoryData {
 
-    public long id;
+    public int id;
     public String device_sn;
     public String updatetime;
     public int device_state;
@@ -19,7 +19,7 @@ public class DeviceHistoryData {
 
     public DeviceHistoryData() {}
     //{"result":[{"id":29472,"device_sn":"0001","updatetime":"2016-10-07T07:30:55.000Z","device_state":1,"device_U":220,"device_I":1,"divice_P":0,"device_electricity":8.9,"remark":null}]}
-    public DeviceHistoryData(long id, String sn, String updatetime, int state, int U, int I, int P, int electricity, String remakr) {
+    public DeviceHistoryData(int id, String sn, String updatetime, int state, int U, int I, int P, int electricity, String remakr) {
         this.id = id;
         this.device_sn = sn;
         this.updatetime = updatetime;

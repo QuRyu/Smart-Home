@@ -1,40 +1,44 @@
 package android.intellhome.services;
 
-import android.content.pm.FeatureInfo;
 import android.intellhome.entity.DeviceHistoryData;
 import android.intellhome.entity.Result;
+import android.util.Log;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by Quentin on 19/10/2016.
  */
 public class RequestService {
 
-    //http://192.168.1.135:3000/tools/gethisData/getHis?_hserverSN=0000000000000107&begtime=20161007104353&endtime=20161008004753
 
-    public static final String BASE_URL = "http://192.168.1.135:3000/";
+    public static final String TAG = "RequestService";
 
+    static Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(URLs.BASE_URL)
+            .addConverterFactory(JacksonConverterFactory.create())
+            .build();
 
-    public static DeviceHistoryData getHisData(String serverSN, String startDate, String endDate) {
+    static RequestInterface requestService = retrofit.create(RequestInterface.class);
 
-        return null;
+    public static DeviceHistoryData getHisData(String serverSN, String startDate, String endDate) throws IOException {
+//        Log.i(TAG, "start history data request");
+
+        Call<Result> call = requestService.getHisData(serverSN, startDate, endDate);
+
+        Response<Result> response = call.execute();
+        List<DeviceHistoryData> data = response.body().result;
+        return data.size() == 0 ? null : data.get(0);
     }
 
-    public static String makeHisURL(String severSN, String startDate, String endDate) {
-        StringBuffer buffer = new StringBuffer(BASE_URL);
-        buffer.append("tools/gethisData/getHis?_hserverSN=");
-        buffer.append(severSN);
-        buffer.append("&begtime=");
-        buffer.append(startDate);
-        buffer.append("&endtime=");
-        buffer.append(endDate);
-        return buffer.toString();
+    public static String getData(String serverSN, String startDate, String endDate) {
+        Call<Result> call = requestService.getHisData(serverSN, startDate, endDate);
+        return call.request().url().toString();
     }
 }
