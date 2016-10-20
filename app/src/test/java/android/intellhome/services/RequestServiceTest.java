@@ -2,15 +2,10 @@ package android.intellhome.services;
 
 import android.intellhome.entity.DeviceHistoryData;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.notification.RunListener;
-
-import static org.junit.Assert.*;
 
 /**
  * Created by Quentin on 20/10/2016.
@@ -31,7 +26,7 @@ public class RequestServiceTest {
         data.device_electricity = 8.9;
         data.device_U = 220;
         data.device_I = 1;
-        data.device_P = 0;
+        data.divice_P = 0;
         data.id = 29472;
         data.device_sn = "0001";
         data.device_state = 1;
@@ -39,8 +34,9 @@ public class RequestServiceTest {
 
     @Test
     public void testGetHisData() throws Exception {
-        Assert.assertTrue("requested data is not right",
-                RequestService.getHisData(serverSN, startDate, endDate) == null);
+        DeviceHistoryData httpData = RequestService.getHisDataSingle(serverSN, startDate, endDate);
+        Assert.assertTrue("requested data is not right", httpData != null);
+        Assert.assertTrue(httpData.equals(data));
     }
 
     @Test

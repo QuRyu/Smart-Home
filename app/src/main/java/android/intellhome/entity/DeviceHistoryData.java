@@ -1,7 +1,5 @@
 package android.intellhome.entity;
 
-import android.media.Image;
-
 /**
  * Created by Quentin on 19/10/2016.
  */
@@ -13,7 +11,7 @@ public class DeviceHistoryData {
     public int device_state;
     public int device_U;
     public int device_I;
-    public int device_P;
+    public int divice_P;
     public double device_electricity;
     public String remark;
 
@@ -26,7 +24,7 @@ public class DeviceHistoryData {
         this.device_state = state;
         this.device_U = U;
         this.device_I = I;
-        this.device_P = P;
+        this.divice_P = P;
         this.device_electricity = electricity;
         this.remark = remakr;
     }
@@ -42,13 +40,13 @@ public class DeviceHistoryData {
         DeviceHistoryData other = (DeviceHistoryData) o;
         return id == other.id && device_sn.equals(other.device_sn)
                 && device_U == other.device_U && device_I == other.device_I
-                && device_P == other.device_P && device_electricity == other.device_electricity
+                && divice_P == other.divice_P && device_electricity == other.device_electricity
                 && device_state == other.device_state;
     }
 
     @Override
     public String toString() {
-        return "device id: " + id + "  U: " + device_U + "  I: " + device_I + "  P: " + device_P;
+        return "device id: " + id + "  U: " + device_U + "  I: " + device_I + "  P: " + divice_P;
     }
 
 

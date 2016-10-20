@@ -27,18 +27,18 @@ public class RequestService {
 
     static RequestInterface requestService = retrofit.create(RequestInterface.class);
 
-    public static DeviceHistoryData getHisData(String serverSN, String startDate, String endDate) throws IOException {
-//        Log.i(TAG, "start history data request");
+    public static DeviceHistoryData getHisDataSingle(String serverSN, String startDate, String endDate) throws IOException {
+        Log.i(TAG, "start to request a single piece of history data ");
+        return getHisDataList(serverSN, startDate, endDate).get(0);
+    }
 
+    public static List<DeviceHistoryData> getHisDataList(String serverSN, String startDate, String endDate) throws IOException {
+        Log.i(TAG, "start to request a list of history data");
         Call<Result> call = requestService.getHisData(serverSN, startDate, endDate);
 
         Response<Result> response = call.execute();
         List<DeviceHistoryData> data = response.body().result;
-        return data.size() == 0 ? null : data.get(0);
+        return data;
     }
 
-    public static String getData(String serverSN, String startDate, String endDate) {
-        Call<Result> call = requestService.getHisData(serverSN, startDate, endDate);
-        return call.request().url().toString();
-    }
 }

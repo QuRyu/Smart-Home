@@ -38,9 +38,7 @@ public class DeviceActivity extends AppCompatActivity {
     Random random = new Random();
     private static final int ITEM_COUNT = 12;
 
-
-
-    // TODO: 18/10/2016 Http request
+    // TODO: 20/10/2016 adjust chart according to data 
     // TODO: 18/10/2016 improve mChart
     LineChart mChart;
 
