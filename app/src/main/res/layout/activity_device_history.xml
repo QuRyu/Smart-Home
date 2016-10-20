@@ -3,81 +3,82 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context=".DeviceActivity">
 
     <LinearLayout
         android:id="@+id/datelayou"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="15dp"
+        android:orientation="horizontal"
         android:paddingLeft="20dp"
-        android:paddingRight="20dp">
+        android:paddingRight="20dp"
+        android:paddingTop="15dp">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.8"
             android:orientation="vertical">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.3"
-                android:text="@string/start_date"
-                android:gravity="center"
-                android:textSize="20sp"/>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_weight="0.8"
-                android:layout_marginBottom="8dp">
-                <EditText
-                    android:id="@+id/et_startDate"
-                    android:layout_width="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:text="12321"
-                    android:inputType="datetime"/>
-            </android.support.design.widget.TextInputLayout>
-        </LinearLayout>
+                    android:layout_weight="0.3"
+                    android:gravity="center"
+                    android:text="@string/start_date"
+                    android:textSize="20sp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_weight="0.8">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:text="@string/end_date"
-                android:gravity="center"
-                android:textSize="20sp"
-                android:layout_weight="0.3"/>
+                    <EditText
+                        android:id="@+id/et_startDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:inputType="datetime"
+                        android:text="12321" />
+                </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_weight="0.8"
-                android:layout_marginBottom="8dp">
+                android:orientation="horizontal">
 
-                <EditText
-                    android:id="@+id/et_endDate"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:inputType="datetime"
-                    android:imeOptions="actionSend"/>
+                    android:layout_weight="0.3"
+                    android:gravity="center"
+                    android:text="@string/end_date"
+                    android:textSize="20sp" />
 
-            </android.support.design.widget.TextInputLayout>
-        </LinearLayout>
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_weight="0.8">
+
+                    <EditText
+                        android:id="@+id/et_endDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:imeOptions="actionSend"
+                        android:inputType="datetime" />
+
+                </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
         </LinearLayout>
 
         <Button
@@ -85,7 +86,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.2"
-            android:text="@string/search"/>
+            android:text="@string/search" />
     </LinearLayout>
 
     <LinearLayout
@@ -97,36 +98,35 @@
             android:id="@+id/cb_current"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/current"
-            android:layout_weight="0.33"/>
+            android:layout_weight="0.33"
+            android:text="@string/current" />
 
         <CheckBox
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.33"
-            android:text="@string/voltage"/>
+            android:text="@string/voltage" />
 
         <CheckBox
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/comsumption"
             android:layout_weight="0.33"
-            />
+            android:text="@string/comsumption" />
     </LinearLayout>
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/linechart"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.5"/>
+        android:layout_weight="0.5" />
 
     <TextView
         android:id="@+id/tv_deviceInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="电流：220V"
         android:gravity="center"
-        android:textSize="20sp"/>
+        android:text="电流：220V"
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/bt_history"

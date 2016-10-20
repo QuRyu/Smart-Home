@@ -61,7 +61,7 @@ public class DeviceActivity extends AppCompatActivity {
         Log.i(TAG, "onCreate method init");
 
         // to be deleted later
-        ((Button) findViewById(R.id.bt_history)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.bt_history).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext(), DemoActivity.class));
