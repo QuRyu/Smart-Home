@@ -17,6 +17,12 @@ public class RequestServiceTest {
 
     DeviceHistoryData data = new DeviceHistoryData();
 
+    String serverSN = "0000000000000107";
+    String startDate = "20161007104353";
+    String endDate = "20161008004753";
+
+    String expected = "http://192.168.1.135:3000/tools/gethisData/getHis?_hserverSN=0000000000000107&begtime=20161007104353&endtime=20161008004753";
+
     //{"id":29472,"device_sn":"0001","updatetime":"2016-10-07T07:30:55.000Z","device_state":1,"device_U":220,"device_I":1,"divice_P":0,"device_electricity":8.9,"remark":null}
     @Before
     public void setup() {
@@ -31,9 +37,12 @@ public class RequestServiceTest {
 
     @Test
     public void testGetHisData() throws Exception {
-        Assert.assertTrue(RequestService.getHisData("0000000000000107", "20161007104353 ", "20161008004753") == null);
-
+        Assert.assertTrue(RequestService.getHisData(serverSN, startDate, endDate) == null);
     }
 
-
+    @Test
+    public void testMakeHisUrl() {
+        Assert.assertEquals(expected,
+                RequestService.makeHisURL(serverSN, startDate, endDate));
+    }
 }

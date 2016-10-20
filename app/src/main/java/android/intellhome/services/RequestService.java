@@ -23,11 +23,11 @@ public class RequestService {
 
 
     public static DeviceHistoryData getHisData(String serverSN, String startDate, String endDate) {
-        
+
         return null;
     }
 
-    private String makeHisURL(String severSN, String startDate, String endDate) {
+    public static String makeHisURL(String severSN, String startDate, String endDate) {
         StringBuffer buffer = new StringBuffer(BASE_URL);
         buffer.append("tools/gethisData/getHis?_hserverSN=");
         buffer.append(severSN);
@@ -35,5 +35,6 @@ public class RequestService {
         buffer.append(startDate);
         buffer.append("&endtime=");
         buffer.append(endDate);
+        return buffer.toString();
     }
 }
