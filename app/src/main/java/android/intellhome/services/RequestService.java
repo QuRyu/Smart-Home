@@ -17,15 +17,9 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  */
 public class RequestService {
 
-
     public static final String TAG = "RequestService";
 
-    static Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(URLs.BASE_URL)
-            .addConverterFactory(JacksonConverterFactory.create())
-            .build();
-
-    static RequestInterface requestService = retrofit.create(RequestInterface.class);
+    static RequestInterface requestService = RequestGenerator.generate(RequestInterface.class);
 
     public static DeviceHistoryData getHisDataSingle(String serverSN, String startDate, String endDate) throws IOException {
         Log.i(TAG, "start to request a single piece of history data ");
