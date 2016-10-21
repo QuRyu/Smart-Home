@@ -39,10 +39,4 @@ public class RequestServiceTest {
         Assert.assertTrue(httpData.equals(data));
     }
 
-    @Test
-    public void testURL() throws Exception {
-        Assert.assertEquals(expected,
-                RequestService.getData(serverSN, startDate, endDate));
-    }
-
 }

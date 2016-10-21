@@ -1,9 +1,12 @@
 package android.intellhome;
 
 import android.intellhome.entity.DeviceHistoryData;
+import android.intellhome.services.RequestService;
 import android.intellhome.utils.DateUtil;
+import android.os.Handler;
+import android.os.Message;
 
-import java.util.GregorianCalendar;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -11,18 +14,57 @@ import java.util.List;
  */
 public class DeviceHistoryController {
 
-    public DataWithnDays requestData(String startDate, String endDate) throws IllegalArgumentException {
-        // get difference of days
-        // check if the date is valid (endDate must be equal to or less than current date
-        // if it's smaller than a month, draw one-month diagram
-        // else if it's no longer than a year, draw twelve months
-        // if it has been several years, draw yearly diagram
+    public static final int METRIC_DAY = 1;
+    public static final int METRIC_MONTH = 2;
+    public static final int METRIC_YEAR = 3;
+
+    public static final int REQUEST_SUCCESS = 1;
+    public static final int REQUEST_FAILURE = 2;
+
+    static String serverSN = "0000000000000107";
+
+    private Handler handler;
+
+    public DeviceHistoryController(Handler handler) {
+        this.handler = handler;
+    }
+
+
+    //
+    public void requestData(final String startDate, final String endDate) throws IllegalArgumentException {
         if (!checkDate(startDate, endDate))
             throw new IllegalArgumentException("end date is larger than current time");
 
-        int numOfDays = DateUtil.calculateDateDiff(startDate, endDate);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Message message = new Message();
+                List<DeviceHistoryData> data = null;
 
-        return null;
+                int numOfDays = DateUtil.calculateDateDiff(startDate, endDate);
+
+                try {
+                    data = RequestService.getHisDataList(serverSN, startDate, endDate);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    message.what = REQUEST_FAILURE;
+                    handler.sendMessage(message);
+                    return;
+                }
+                message.arg1 = numOfDays;
+                if (numOfDays <= 30)
+                    message.arg2 = METRIC_DAY;
+                else if (numOfDays <= 365)
+                    message.arg2 = METRIC_MONTH;
+                else
+                    message.arg2 = METRIC_YEAR;
+
+                message.obj = data;
+                message.what = REQUEST_SUCCESS;
+                handler.sendMessage(message);
+            }
+        });
+
     }
 
     // TODO: 21/10/2016 add criteria for endDate
@@ -31,22 +73,4 @@ public class DeviceHistoryController {
         return !(endD > System.currentTimeMillis());
     }
 
-    public static final class DataWithnDays {
-
-        private int nOfDays;
-        private List<DeviceHistoryData> historyData;
-
-        DataWithnDays(int nOfDays, List<DeviceHistoryData> historyData) {
-            this.nOfDays = nOfDays;
-            this.historyData = historyData;
-        }
-
-        public int getnOfDays() {
-            return nOfDays;
-        }
-
-        public List<DeviceHistoryData> getHistoryData() {
-            return historyData;
-        }
-    }
 }
