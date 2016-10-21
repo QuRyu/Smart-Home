@@ -51,13 +51,19 @@ public class DeviceHistoryController {
                     handler.sendMessage(message);
                     return;
                 }
-                message.arg1 = numOfDays;
-                if (numOfDays <= 30)
+
+                if (numOfDays <= 30) {
+                    message.arg1 = numOfDays;
                     message.arg2 = METRIC_DAY;
-                else if (numOfDays <= 365)
+                }
+                else if (numOfDays <= 365) {
+                    message.arg1 = computeMonth(numOfDays);
                     message.arg2 = METRIC_MONTH;
-                else
+                }
+                else{
+                    message.arg1 = computeYear(numOfDays);
                     message.arg2 = METRIC_YEAR;
+                }
 
                 message.obj = data;
                 message.what = REQUEST_SUCCESS;
@@ -73,4 +79,17 @@ public class DeviceHistoryController {
         return !(endD > System.currentTimeMillis());
     }
 
+    private static int computeMonth(int nOfDays) {
+        int n = nOfDays / 30;
+        if (nOfDays % 30 > 0)
+            ++n;
+        return n;
+    }
+
+    private static int computeYear(int nOfDays) {
+        int n = nOfDays / 365;
+        if (nOfDays % 365 > 0)
+            ++n;
+        return n;
+    }
 }

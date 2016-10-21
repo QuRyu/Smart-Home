@@ -15,4 +15,6 @@
     <string name="filed_required_endDate">请输入正确的结束日期</string>
 
     <string name="device_name_switch">卧室智能开关</string>
+
+    <string name="network_failure">网络故障，请稍后重试</string>
 </resources>

@@ -2,6 +2,7 @@ package android.intellhome;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.intellhome.entity.DeviceHistoryData;
 import android.intellhome.utils.RegExp;
 import android.os.Handler;
 import android.os.Message;
@@ -158,7 +159,9 @@ public class DeviceActivity extends AppCompatActivity {
                 "querying", Toast.LENGTH_SHORT).show();
     }
 
-    private void invalidateChart() {}
+    private void invalidateChart(List<DeviceHistoryData> historyData, int n, int metric) {
+
+    }
 
     private View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
@@ -181,4 +184,19 @@ public class DeviceActivity extends AppCompatActivity {
         }
     };
 
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case DeviceHistoryController.REQUEST_FAILURE:
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.network_failure), Toast.LENGTH_SHORT).show();
+                    break;
+                case DeviceHistoryController.REQUEST_SUCCESS:
+
+                    break;
+            }
+
+        }
+    };
 }
