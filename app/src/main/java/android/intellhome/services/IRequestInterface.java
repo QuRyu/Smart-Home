@@ -9,7 +9,7 @@ import retrofit2.http.Query;
 /**
  * Created by Quentin on 20/10/2016.
  */
-public interface RequestInterface {
+public interface IRequestInterface {
 
     @GET("tools/gethisData/getHis")
     public Call<Result> getHisData(@Query("_hserverSN") String serverSN,

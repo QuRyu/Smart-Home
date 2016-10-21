@@ -16,7 +16,7 @@ public class DeviceHistoryController {
         // if it's smaller than a month, draw one-month diagram
         // else if it's no longer than a year, draw twelve months
         // if it has been several years, draw yearly diagram
-        
+
         int numOfDays = DateUtil.calculateDateDiff(startDate, endDate);
         return null;
     }

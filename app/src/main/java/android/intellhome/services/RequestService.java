@@ -9,8 +9,6 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by Quentin on 19/10/2016.
@@ -19,7 +17,7 @@ public class RequestService {
 
     public static final String TAG = "RequestService";
 
-    static RequestInterface requestService = RequestGenerator.generate(RequestInterface.class);
+    static IRequestInterface requestService = RequestGenerator.generate(IRequestInterface.class);
 
     public static DeviceHistoryData getHisDataSingle(String serverSN, String startDate, String endDate) throws IOException {
         Log.i(TAG, "start to request a single piece of history data ");
