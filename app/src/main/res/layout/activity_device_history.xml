@@ -42,11 +42,14 @@
                     android:layout_weight="0.8">
 
                     <EditText
-                        android:id="@+id/et_startDate"
+                        android:id="@+id/tv_startDate"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:inputType="datetime"
-                        android:text="12321" />
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"/>
+
                 </android.support.design.widget.TextInputLayout>
             </LinearLayout>
 
@@ -67,15 +70,18 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
+                    android:layout_marginStart="10dp"
                     android:layout_marginTop="8dp"
                     android:layout_weight="0.8">
 
                     <EditText
-                        android:id="@+id/et_endDate"
+                        android:id="@+id/tv_endDate"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:imeOptions="actionSend"
-                        android:inputType="datetime" />
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"/>
 
                 </android.support.design.widget.TextInputLayout>
             </LinearLayout>

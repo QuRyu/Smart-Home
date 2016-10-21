@@ -1,21 +1,17 @@
 package android.intellhome;
 
-import android.content.Intent;
+import android.app.DatePickerDialog;
 import android.graphics.Color;
 import android.intellhome.entity.DeviceHistoryData;
-import android.intellhome.utils.RegExp;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -26,13 +22,26 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.AxisValueFormatter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class DeviceActivity extends AppCompatActivity {
 
     public static final String TAG = "DeviceActivity";
+
+    private static final int FLAG_START_DATE = 1;
+    private static final int FLAG_END_DATE = 2;
+
+
+    public static final int HANDLER_WHAT_REQUEST_SUCCESS = 1;
+    public static final int HANDLER_WHAT_REQUEST_FAILURE = 2;
+    private static final int HANDLER_WHAT_UPDATE_LABEL = 3;
+
 
 
     // mock, to be deleted later
@@ -46,11 +55,18 @@ public class DeviceActivity extends AppCompatActivity {
     Button mBt_search;
     List<Entry> entries = new ArrayList<>();
 
-    EditText mET_startDate;
-    EditText mET_endDate;
+    EditText mStartDate;
+    EditText mEndDate;
 
-    String mMonths [] = {"Jan", "Feb", "Mar", "Apr",
+    static String format = "yy/mm/dd";
+    static SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.CHINA);
+
+    int flag;
+
+    String mMonths[] = {"Jan", "Feb", "Mar", "Apr",
             "May", "June", "July", "Aug", "Spe", "Oct", "Nov", "Dec"};
+
+    DeviceHistoryController controller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,17 +75,13 @@ public class DeviceActivity extends AppCompatActivity {
 
         Log.i(TAG, "onCreate method init");
 
-        // to be deleted later
-        findViewById(R.id.bt_history).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), DemoActivity.class));
-            }
-        });
+        controller = new DeviceHistoryController(mHandler);
 
         mBt_search = (Button) findViewById(R.id.bt_search);
-        mET_startDate = (EditText) findViewById(R.id.et_startDate);
-        mET_endDate = (EditText) findViewById(R.id.et_endDate);
+        mStartDate = (EditText) findViewById(R.id.tv_startDate);
+        mStartDate.setOnClickListener(textViewOnClickListener);
+        mEndDate = (EditText) findViewById(R.id.tv_endDate);
+        mEndDate.setOnClickListener(textViewOnClickListener);
 
         mChart = (LineChart) findViewById(R.id.linechart);
 
@@ -105,7 +117,7 @@ public class DeviceActivity extends AppCompatActivity {
         LineData data = new LineData();
         List<Entry> entries = new ArrayList<>();
 
-        for (int i=0; i < ITEM_COUNT; i++)
+        for (int i = 0; i < ITEM_COUNT; i++)
             entries.add(new Entry(i + 0.5f, getRandom()));
 
         LineDataSet dataSet = new LineDataSet(entries, "Line DataSet");
@@ -117,48 +129,6 @@ public class DeviceActivity extends AppCompatActivity {
         return random.nextFloat() * ITEM_COUNT;
     }
 
-    private void checkTextAndQuery() {
-        Log.i(TAG, "start to check text");
-        String startDate = mET_startDate.getText().toString();
-        String endDate = mET_endDate.getText().toString();
-
-        if (checkText(startDate, endDate)) {
-            // run the query
-            Log.i(TAG, "text check passed");
-            queryHistory();
-        } else
-            Log.i(TAG, "text check failed");
-
-
-    }
-
-    private boolean checkText(String startDate, String endDate) {
-        boolean isStartDateCorrect = RegExp.isExpFormatCorrect(startDate);
-        boolean isEndDateCorect = RegExp.isExpFormatCorrect(endDate);
-
-        View focusView = null;
-
-        if (!isStartDateCorrect || !isEndDateCorect) { // at least the format of one EditText is wong
-            // tell users which EditText is incorrect
-            if (!isStartDateCorrect) {
-                mET_startDate.setError(getString(R.string.field_required_startDate));
-                focusView = mET_startDate;
-            }
-            if (!isEndDateCorect) {
-                mET_endDate.setError(getString(R.string.filed_required_endDate));
-                focusView = mET_endDate;
-            }
-            focusView.requestFocus();
-        }
-
-        return isStartDateCorrect && isEndDateCorect;
-    }
-
-    private void queryHistory() {
-        Toast.makeText(getApplicationContext(),
-                "querying", Toast.LENGTH_SHORT).show();
-    }
-
     private void invalidateChart(List<DeviceHistoryData> historyData, int n, int metric) {
 
     }
@@ -167,24 +137,52 @@ public class DeviceActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Log.i(TAG, "query button clicked");
-            checkTextAndQuery();
+            controller.requestData(getStartDate(), getEndDate());
         }
     };
 
-    private TextView.OnEditorActionListener editorActionListener = new TextView.OnEditorActionListener() {
+    private String getStartDate() {
+        return null;
+    }
+
+    private String getEndDate() {
+        return null;
+    }
+
+    private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
         @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            boolean handled = false;
-            if (actionId == EditorInfo.IME_ACTION_SEND) {
-                Log.i(TAG, "query started by action of EditText");
-                checkTextAndQuery();
-                handled = true;
-            }
-            return handled;
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            Log.i(TAG, "date selected");
+            GregorianCalendar calendar = new GregorianCalendar(year, monthOfYear, dayOfMonth);
+            Message message = mHandler.obtainMessage();
+            message.what = HANDLER_WHAT_UPDATE_LABEL;
+            message.obj = calendar;
+            message.sendToTarget();
         }
     };
 
-    Handler handler = new Handler() {
+    private View.OnClickListener textViewOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.i(TAG, "EditText click listener activated");
+            switch (v.getId()) {
+                case R.id.tv_startDate:
+                    flag = FLAG_START_DATE;
+                    break;
+                case R.id.tv_endDate:
+                    flag = FLAG_END_DATE;
+                    break;
+                default:
+                    throw new IllegalArgumentException("cannot match view");
+            }
+            GregorianCalendar calendar = (GregorianCalendar) GregorianCalendar.getInstance();
+            new DatePickerDialog(DeviceActivity.this,
+                    dateSetListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)).show();
+        }
+    };
+
+    Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -194,6 +192,21 @@ public class DeviceActivity extends AppCompatActivity {
                     break;
                 case DeviceHistoryController.REQUEST_SUCCESS:
                     invalidateChart((List<DeviceHistoryData>) msg.obj, msg.arg1, msg.arg2);
+                    break;
+                case HANDLER_WHAT_UPDATE_LABEL:
+                    Log.i(TAG, "handler ==> update label");
+                    Calendar calendar = (Calendar) msg.obj;
+                    String text = calendar.get(Calendar.YEAR) + " " + calendar.get(Calendar.MONTH) + " " + calendar.get(Calendar.DAY_OF_MONTH);
+                    switch (flag) {
+                        case FLAG_START_DATE:
+                            mStartDate.setText(text);
+                            break;
+                        case FLAG_END_DATE:
+                            mEndDate.setText(text);
+                            break;
+                        default:
+                            throw new IllegalArgumentException("wrong flag");
+                    }
                     break;
             }
 
