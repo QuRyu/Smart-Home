@@ -193,7 +193,7 @@ public class DeviceActivity extends AppCompatActivity {
                             getString(R.string.network_failure), Toast.LENGTH_SHORT).show();
                     break;
                 case DeviceHistoryController.REQUEST_SUCCESS:
-
+                    invalidateChart((List<DeviceHistoryData>) msg.obj, msg.arg1, msg.arg2);
                     break;
             }
 
