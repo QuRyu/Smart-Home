@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Quentin on 20/10/2016.
  */
-public class Result {
+public final class Result {
 
     public List<DeviceHistoryData> result;
 

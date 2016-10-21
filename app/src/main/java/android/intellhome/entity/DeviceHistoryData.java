@@ -3,7 +3,7 @@ package android.intellhome.entity;
 /**
  * Created by Quentin on 19/10/2016.
  */
-public class DeviceHistoryData {
+public final class DeviceHistoryData {
 
     public int id;
     public String device_sn;

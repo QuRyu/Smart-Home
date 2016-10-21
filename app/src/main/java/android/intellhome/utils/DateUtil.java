@@ -7,6 +7,10 @@ import java.util.GregorianCalendar;
  */
 public class DateUtil {
 
+    public static long stringdate2Unixtime(String date) {
+        return RegExp.text2Date(date).getTimeInMillis();
+    }
+
     /**
      * Calculate the days of difference between two dates.
      * @param startDate start date for query
