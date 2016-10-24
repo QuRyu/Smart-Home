@@ -45,7 +45,7 @@ public class DeviceActivity extends AppCompatActivity {
 
     public static final String METRIC = "metric";
     public static final String DAYS_OF_DIFFERENCE = "daysOfDifference";
-    public static final String START = "start"; 
+    public static final String START = "start";
 
 
     // mock, to be deleted later

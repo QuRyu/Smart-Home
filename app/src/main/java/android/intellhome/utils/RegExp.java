@@ -1,5 +1,6 @@
 package android.intellhome.utils;
 
+import java.security.PublicKey;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
@@ -40,7 +41,20 @@ public class RegExp {
             return null;
     }
 
+    public static int getDay(String date) {
+        return text2Date(date).get(GregorianCalendar.DAY_OF_MONTH);
+    }
+
+    public static int getMonth(String date) {
+        return text2Date(date).get(GregorianCalendar.MONTH);
+    }
+
+    public static int getYear(String date) {
+        return text2Date(date).get(GregorianCalendar.YEAR);
+    }
+
     private static int string2Int(String text) {
         return Integer.valueOf(text);
     }
+
 }
