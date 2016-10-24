@@ -56,6 +56,8 @@ public class DeviceActivity extends AppCompatActivity {
     private int metric;
     private int start;
 
+    private boolean isFirstSearch;
+
     // mock, to be deleted later
     Random random = new Random();
     private static final int ITEM_COUNT = 12;
@@ -101,6 +103,8 @@ public class DeviceActivity extends AppCompatActivity {
         mChart.setDragEnabled(false);
         mChart.setDescription("");
         mChart.setEnabled(false);
+
+        isFirstSearch = true;
 
     }
 
@@ -190,6 +194,7 @@ public class DeviceActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Log.i(TAG, "query button clicked");
+            isFirstSearch = false;
             controller.requestData(getStartDate(), getEndDate());
         }
     };
