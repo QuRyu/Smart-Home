@@ -3,6 +3,7 @@ package android.intellhome;
 import android.intellhome.entity.DeviceHistoryData;
 import android.intellhome.services.RequestService;
 import android.intellhome.utils.DateUtil;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
@@ -30,7 +31,10 @@ public class DeviceHistoryController {
     }
 
 
-    //
+    // arg1: days of difference
+    // arg2: metric
+    // what: request status -> startDate
+    // describe contents:  -> request status
     public void requestData(final String startDate, final String endDate) throws IllegalArgumentException {
         if (!checkDate(startDate, endDate))
             throw new IllegalArgumentException("end date is larger than current time");
@@ -42,7 +46,7 @@ public class DeviceHistoryController {
                 List<DeviceHistoryData> data = null;
 
                 int numOfDays = DateUtil.calculateDateDiff(startDate, endDate);
-
+                Bundle bundle = new Bundle();
                 try {
                     data = RequestService.getHisDataList(serverSN, startDate, endDate);
                 } catch (IOException e) {
@@ -53,17 +57,19 @@ public class DeviceHistoryController {
                 }
 
                 if (numOfDays <= 30) {
-                    message.arg1 = numOfDays;
-                    message.arg2 = METRIC_DAY;
+                    bundle.putInt(DeviceActivity.METRIC, METRIC_DAY);
+                    bundle.putInt(DeviceActivity.DAYS_OF_DIFFERENCE, numOfDays);
                 }
                 else if (numOfDays <= 365) {
-                    message.arg1 = computeMonth(numOfDays);
-                    message.arg2 = METRIC_MONTH;
+                    bundle.putInt(DeviceActivity.METRIC, METRIC_MONTH);
+                    bundle.putInt(DeviceActivity.DAYS_OF_DIFFERENCE, computeMonth(numOfDays));
                 }
+
                 else{
-                    message.arg1 = computeYear(numOfDays);
-                    message.arg2 = METRIC_YEAR;
+                    bundle.putInt(DeviceActivity.METRIC, METRIC_YEAR);
+                    bundle.putInt(DeviceActivity.DAYS_OF_DIFFERENCE, computeYear(numOfDays));
                 }
+
 
                 message.obj = data;
                 message.what = REQUEST_SUCCESS;

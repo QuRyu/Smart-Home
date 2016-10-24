@@ -43,6 +43,10 @@ public class DeviceActivity extends AppCompatActivity {
     private static final int HANDLER_WHAT_UPDATE_LABEL = 3;
 
 
+    public static final String METRIC = "metric";
+    public static final String DAYS_OF_DIFFERENCE = "daysOfDifference";
+    public static final String START = "start"; 
+
 
     // mock, to be deleted later
     Random random = new Random();
