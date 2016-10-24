@@ -47,6 +47,14 @@ public class DeviceActivity extends AppCompatActivity {
     public static final String DAYS_OF_DIFFERENCE = "daysOfDifference";
     public static final String START = "start";
 
+    static final int DRAW_ELECTRICITY = 1;
+    static final int DRAW_CURRENT = 2;
+    static final int DRAW_U = 3;
+
+    private List<Entry> historyDataset;
+    private int numOfDays;
+    private int metric;
+    private int start;
 
     // mock, to be deleted later
     Random random = new Random();
@@ -54,6 +62,7 @@ public class DeviceActivity extends AppCompatActivity {
 
     // TODO: 20/10/2016 adjust chart according to data 
     // TODO: 18/10/2016 improve mChart
+    // TODO: 24/10/2016 Error Date checking
     LineChart mChart;
 
     Button mBt_search;
@@ -91,28 +100,8 @@ public class DeviceActivity extends AppCompatActivity {
 
         mChart.setDragEnabled(false);
         mChart.setDescription("");
+        mChart.setEnabled(false);
 
-        XAxis xAxis = mChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setGranularity(1f);
-        xAxis.setAxisMinValue(0f);
-        xAxis.setValueFormatter(new AxisValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return mMonths[(int) value % mMonths.length];
-            }
-
-            @Override
-            public int getDecimalDigits() {
-                return 0;
-            }
-        });
-
-        LineData data = generateLineData();
-        data.setValueTextColor(Color.BLUE);
-        xAxis.setAxisMaxValue(data.getXMax() + 0.25f);
-        mChart.setData(data);
-        mChart.invalidate();
     }
 
 
@@ -133,8 +122,68 @@ public class DeviceActivity extends AppCompatActivity {
         return random.nextFloat() * ITEM_COUNT;
     }
 
-    private void invalidateChart(List<DeviceHistoryData> historyData, int n, int metric) {
+    private void invalidateChart(List<DeviceHistoryData> historyData, int n, int metric, int start, int draw) {
+        XAxis xAxis = mChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setAxisMinValue(0f);
+        xAxis.setValueFormatter(new AxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return mMonths[(int) value % mMonths.length];
+            }
 
+            @Override
+            public int getDecimalDigits() {
+                return 0;
+            }
+        });
+
+        LineData lineData = new LineData();
+        lineData.setValueTextColor(Color.BLUE);
+
+        int y = start;
+
+        switch (metric) {
+            case DeviceHistoryController.METRIC_DAY:
+                fillData(lineData, historyData, start, 30, draw);
+                break;
+            case DeviceHistoryController.METRIC_MONTH:
+                fillData(lineData, historyData, start, 12, draw);
+                break;
+            case DeviceHistoryController.METRIC_YEAR:
+                fillData(lineData, historyData, start, 2055, draw);
+                break;
+        }
+        xAxis.setAxisMaxValue(lineData.getXMax() + 0.25f);
+        mChart.setData(lineData);
+        mChart.invalidate();
+    }
+
+    private void fillData(LineData lineData, List<DeviceHistoryData> historyData, int start, int max, int draw) {
+        List<Entry> entries = new ArrayList<>();
+        switch (draw) {
+            case DRAW_ELECTRICITY:
+                for (DeviceHistoryData data: historyData) {
+                    entries.add(new Entry(double2Float(data.device_electricity), start++));
+                    if (start > max) start = start - max;
+                }
+                break;
+            case DRAW_CURRENT:
+                for (DeviceHistoryData daat: historyData) {
+                    entries.add(new Entry(double2Float(daat.device_I), start++));
+                    if (start > max) start -= max;
+                }
+                break;
+            case DRAW_U:
+                for (DeviceHistoryData daat: historyData) {
+                    entries.add(new Entry(double2Float(daat.device_U), start++));
+                    if (start > max) start -= max;
+                }
+                break;
+        }
+        LineDataSet dataSet = new LineDataSet(entries, "data");
+        lineData.addDataSet(dataSet);
     }
 
     private View.OnClickListener clickListener = new View.OnClickListener() {
@@ -151,6 +200,10 @@ public class DeviceActivity extends AppCompatActivity {
 
     private String getEndDate() {
         return null;
+    }
+
+    private float double2Float(double value) {
+        return new Double(value).floatValue();
     }
 
     private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
@@ -195,7 +248,11 @@ public class DeviceActivity extends AppCompatActivity {
                             getString(R.string.network_failure), Toast.LENGTH_SHORT).show();
                     break;
                 case DeviceHistoryController.REQUEST_SUCCESS:
-                    invalidateChart((List<DeviceHistoryData>) msg.obj, msg.arg1, msg.arg2);
+                    Bundle bundle = msg.getData();
+                    int metric = bundle.getInt(METRIC);
+                    int daysOfDifference = bundle.getInt(DAYS_OF_DIFFERENCE);
+                    int start = bundle.getInt(START);
+                    invalidateChart((List<DeviceHistoryData>) msg.obj, daysOfDifference, metric, start, DRAW_ELECTRICITY);
                     break;
                 case HANDLER_WHAT_UPDATE_LABEL:
                     Log.i(TAG, "handler ==> update label");
