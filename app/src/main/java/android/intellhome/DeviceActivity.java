@@ -23,10 +23,12 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.AxisValueFormatter;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,7 +53,7 @@ public class DeviceActivity extends AppCompatActivity {
     static final int DRAW_CURRENT = 2;
     static final int DRAW_U = 3;
 
-    private List<Entry> historyDataset;
+    private List<DeviceHistoryData> historyDataset;
     private int numOfDays;
     private int metric;
     private int start;
@@ -59,7 +61,7 @@ public class DeviceActivity extends AppCompatActivity {
     // for branching
     private boolean isFirstSearch;
     private int flag;
-    private int currentChecked;
+    private int currentChecked = -1;
 
     // mock, to be deleted later
     private static final int ITEM_COUNT = 12;
@@ -126,7 +128,13 @@ public class DeviceActivity extends AppCompatActivity {
 
     }
 
-    private void invalidateChart(List<DeviceHistoryData> historyData, int n, int metric, int start, int draw) {
+    private void invalidateChart(List<DeviceHistoryData> historyData, int n, int metric, int start) {
+        historyDataset = historyData;
+        numOfDays = n;
+        this.metric = metric;
+        this.start = start;
+
+
         XAxis xAxis = mChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
@@ -146,43 +154,45 @@ public class DeviceActivity extends AppCompatActivity {
         LineData lineData = new LineData();
         lineData.setValueTextColor(Color.BLUE);
 
-        int y = start;
-
         switch (metric) {
             case DeviceHistoryController.METRIC_DAY:
-                fillData(lineData, historyData, start, 30, draw);
+                fillData(lineData, historyData, start, 30);
                 break;
             case DeviceHistoryController.METRIC_MONTH:
-                fillData(lineData, historyData, start, 12, draw);
+                fillData(lineData, historyData, start, 12);
                 break;
             case DeviceHistoryController.METRIC_YEAR:
-                fillData(lineData, historyData, start, 2055, draw);
+                fillData(lineData, historyData, start, 2055);
                 break;
         }
+
         xAxis.setAxisMaxValue(lineData.getXMax() + 0.25f);
         mChart.setData(lineData);
         mChart.invalidate();
+        Log.i(TAG, "finish rendering chart");
     }
 
-    private void fillData(LineData lineData, List<DeviceHistoryData> historyData, int start, int max, int draw) {
+    private void fillData(LineData lineData, List<DeviceHistoryData> historyData, int start, int max) {
+        Log.i(TAG, "start to fill chart with data");
+        int x = start;
         List<Entry> entries = new ArrayList<>();
-        switch (draw) {
+        switch (currentChecked) {
             case DRAW_ELECTRICITY:
                 for (DeviceHistoryData data: historyData) {
-                    entries.add(new Entry(double2Float(data.device_electricity), start++));
-                    if (start > max) start = start - max;
+                    entries.add(new Entry(x++, double2Float(data.device_electricity)));
+                    if (x > max) x = x - max;
                 }
                 break;
             case DRAW_CURRENT:
                 for (DeviceHistoryData daat: historyData) {
-                    entries.add(new Entry(double2Float(daat.device_I), start++));
-                    if (start > max) start -= max;
+                    entries.add(new Entry(x++, double2Float(daat.device_I)));
+                    if (x > max) x -= max;
                 }
                 break;
             case DRAW_U:
                 for (DeviceHistoryData daat: historyData) {
-                    entries.add(new Entry(double2Float(daat.device_U), start++));
-                    if (start > max) start -= max;
+                    entries.add(new Entry(x++, double2Float(daat.device_U)));
+                    if (x > max) x -= max;
                 }
                 break;
         }
@@ -206,12 +216,18 @@ public class DeviceActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Log.i(TAG, "query button clicked");
-//            controller.requestData(getStartDate(), getEndDate());
-            if (isFirstSearch) {
+            try {
+                controller.requestData(getStartDate(), getEndDate());
+            } catch (IOException e) {
+                e.printStackTrace();
+                mHandler.sendEmptyMessage(DeviceHistoryController.REQUEST_FAILURE);
+            }
+            if (isFirstSearch && currentChecked == -1) {
                 isFirstSearch = false;
                 currentChecked = DRAW_ELECTRICITY;
-                setAllCheckboxOff();
                 mCB_Electricity.setChecked(true);
+            } else if (isFirstSearch) {
+                isFirstSearch = false;
             }
         }
     };
@@ -220,6 +236,11 @@ public class DeviceActivity extends AppCompatActivity {
         mCB_I.setChecked(false);
         mCB_U.setChecked(false);
         mCB_Electricity.setChecked(false);
+    }
+
+    private void drawIfNotForTheFirstTime() {
+        if (!isFirstSearch)
+            invalidateChart(historyDataset, numOfDays, metric, start);
     }
 
     private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
@@ -264,6 +285,7 @@ public class DeviceActivity extends AppCompatActivity {
                         setAllCheckboxOff();
                         mCB_I.setChecked(true);
                         currentChecked = DRAW_CURRENT;
+                        drawIfNotForTheFirstTime();
                     }
                     break;
                 case R.id.cb_electricity:
@@ -271,6 +293,7 @@ public class DeviceActivity extends AppCompatActivity {
                         setAllCheckboxOff();
                         mCB_Electricity.setChecked(true);
                         currentChecked = DRAW_ELECTRICITY;
+                        drawIfNotForTheFirstTime();
                     }
                     break;
                 case R.id.cb_U:
@@ -278,6 +301,7 @@ public class DeviceActivity extends AppCompatActivity {
                         setAllCheckboxOff();
                         mCB_U.setChecked(true);
                         currentChecked = DRAW_U;
+                        drawIfNotForTheFirstTime();
                     }
                     break;
             }
@@ -289,15 +313,18 @@ public class DeviceActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case DeviceHistoryController.REQUEST_FAILURE:
+                    Log.i(TAG, "request failure, ask the user to reconnect");
                     Toast.makeText(getApplicationContext(),
                             getString(R.string.network_failure), Toast.LENGTH_SHORT).show();
                     break;
                 case DeviceHistoryController.REQUEST_SUCCESS:
+                    Log.i(TAG, "request success, start to render data");
                     Bundle bundle = msg.getData();
                     int metric = bundle.getInt(METRIC);
                     int daysOfDifference = bundle.getInt(DAYS_OF_DIFFERENCE);
                     int start = bundle.getInt(START);
-                    invalidateChart((List<DeviceHistoryData>) msg.obj, daysOfDifference, metric, start, currentChecked);
+                    Log.i(TAG, "metric:" + metric + ", days of difference:" + daysOfDifference + ", start date:" + start);
+                    invalidateChart((List<DeviceHistoryData>) msg.obj, daysOfDifference, metric, start);
                     break;
                 case HANDLER_WHAT_UPDATE_LABEL:
                     Log.i(TAG, "handler ==> update label");
@@ -318,4 +345,5 @@ public class DeviceActivity extends AppCompatActivity {
 
         }
     };
+
 }

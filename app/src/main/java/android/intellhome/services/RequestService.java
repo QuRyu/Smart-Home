@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -19,18 +20,10 @@ public class RequestService {
 
     static IRequestInterface requestService = RequestGenerator.generate(IRequestInterface.class);
 
-    public static DeviceHistoryData getHisDataSingle(String serverSN, String startDate, String endDate) throws IOException {
-        Log.i(TAG, "start to request a single piece of history data ");
-        return getHisDataList(serverSN, startDate, endDate).get(0);
-    }
-
-    public static List<DeviceHistoryData> getHisDataList(String serverSN, String startDate, String endDate) throws IOException {
+    public static void getHisDataList(String serverSN, String startDate, String endDate, Callback<Result> callback) throws IOException {
         Log.i(TAG, "start to request a list of history data");
         Call<Result> call = requestService.getHisData(serverSN, startDate, endDate);
-
-        Response<Result> response = call.execute();
-        List<DeviceHistoryData> data = response.body().result;
-        return data;
+        call.enqueue(callback);
     }
 
 }
