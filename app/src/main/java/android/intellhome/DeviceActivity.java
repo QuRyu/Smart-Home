@@ -108,8 +108,11 @@ public class DeviceActivity extends AppCompatActivity {
         mEndDate.setOnClickListener(textViewOnClickListener);
 
         mCB_Electricity = (CheckBox) findViewById(R.id.cb_electricity);
+        mCB_Electricity.setOnClickListener(checkboxOnClickListener);
         mCB_U = (CheckBox) findViewById(R.id.cb_U);
+        mCB_U.setOnClickListener(checkboxOnClickListener);
         mCB_I = (CheckBox) findViewById(R.id.cb_current);
+        mCB_I.setOnClickListener(checkboxOnClickListener);
 
 
         mChart = (LineChart) findViewById(R.id.linechart);
@@ -203,14 +206,21 @@ public class DeviceActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Log.i(TAG, "query button clicked");
-            controller.requestData(getStartDate(), getEndDate());
+//            controller.requestData(getStartDate(), getEndDate());
             if (isFirstSearch) {
-                currentChecked = DRAW_ELECTRICITY;
-                mCB_Electricity.setChecked(true);
                 isFirstSearch = false;
+                currentChecked = DRAW_ELECTRICITY;
+                setAllCheckboxOff();
+                mCB_Electricity.setChecked(true);
             }
         }
     };
+
+    private void setAllCheckboxOff() {
+        mCB_I.setChecked(false);
+        mCB_U.setChecked(false);
+        mCB_Electricity.setChecked(false);
+    }
 
     private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
         @Override
@@ -251,24 +261,21 @@ public class DeviceActivity extends AppCompatActivity {
             switch (v.getId()) {
                 case R.id.cb_current:
                     if (currentChecked != DRAW_CURRENT) {
-                        mCB_Electricity.setChecked(false);
-                        mCB_U.setChecked(false);
+                        setAllCheckboxOff();
                         mCB_I.setChecked(true);
                         currentChecked = DRAW_CURRENT;
                     }
                     break;
                 case R.id.cb_electricity:
                     if (currentChecked != DRAW_ELECTRICITY) {
-                        mCB_U.setChecked(false);
-                        mCB_I.setChecked(false);
+                        setAllCheckboxOff();
                         mCB_Electricity.setChecked(true);
                         currentChecked = DRAW_ELECTRICITY;
                     }
                     break;
                 case R.id.cb_U:
                     if (currentChecked != DRAW_U) {
-                        mCB_Electricity.setChecked(false);
-                        mCB_I.setChecked(false);
+                        setAllCheckboxOff();
                         mCB_U.setChecked(true);
                         currentChecked = DRAW_U;
                     }
