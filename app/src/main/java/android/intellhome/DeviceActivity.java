@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -28,7 +29,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 public class DeviceActivity extends AppCompatActivity {
 
@@ -56,10 +56,12 @@ public class DeviceActivity extends AppCompatActivity {
     private int metric;
     private int start;
 
+    // for branching
     private boolean isFirstSearch;
+    private int flag;
+    private int currentChecked;
 
     // mock, to be deleted later
-    Random random = new Random();
     private static final int ITEM_COUNT = 12;
 
     // TODO: 20/10/2016 adjust chart according to data 
@@ -73,10 +75,14 @@ public class DeviceActivity extends AppCompatActivity {
     EditText mStartDate;
     EditText mEndDate;
 
+    CheckBox mCB_Electricity;
+    CheckBox mCB_U;
+    CheckBox mCB_I;
+
     static String format = "yy/mm/dd";
     static SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.CHINA);
 
-    int flag;
+
 
     String mMonths[] = {"Jan", "Feb", "Mar", "Apr",
             "May", "June", "July", "Aug", "Spe", "Oct", "Nov", "Dec"};
@@ -93,10 +99,18 @@ public class DeviceActivity extends AppCompatActivity {
         controller = new DeviceHistoryController(mHandler);
 
         mBt_search = (Button) findViewById(R.id.bt_search);
+        mBt_search.setOnClickListener(buttonOnClickListener);
+
+
         mStartDate = (EditText) findViewById(R.id.tv_startDate);
         mStartDate.setOnClickListener(textViewOnClickListener);
         mEndDate = (EditText) findViewById(R.id.tv_endDate);
         mEndDate.setOnClickListener(textViewOnClickListener);
+
+        mCB_Electricity = (CheckBox) findViewById(R.id.cb_electricity);
+        mCB_U = (CheckBox) findViewById(R.id.cb_U);
+        mCB_I = (CheckBox) findViewById(R.id.cb_current);
+
 
         mChart = (LineChart) findViewById(R.id.linechart);
 
@@ -106,24 +120,7 @@ public class DeviceActivity extends AppCompatActivity {
 
         isFirstSearch = true;
 
-    }
 
-
-    // mocking, to be deleted later
-    private LineData generateLineData() {
-        LineData data = new LineData();
-        List<Entry> entries = new ArrayList<>();
-
-        for (int i = 0; i < ITEM_COUNT; i++)
-            entries.add(new Entry(i + 0.5f, getRandom()));
-
-        LineDataSet dataSet = new LineDataSet(entries, "Line DataSet");
-        data.addDataSet(dataSet);
-        return data;
-    }
-
-    private float getRandom() {
-        return random.nextFloat() * ITEM_COUNT;
     }
 
     private void invalidateChart(List<DeviceHistoryData> historyData, int n, int metric, int start, int draw) {
@@ -190,15 +187,6 @@ public class DeviceActivity extends AppCompatActivity {
         lineData.addDataSet(dataSet);
     }
 
-    private View.OnClickListener clickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Log.i(TAG, "query button clicked");
-            isFirstSearch = false;
-            controller.requestData(getStartDate(), getEndDate());
-        }
-    };
-
     private String getStartDate() {
         return null;
     }
@@ -210,6 +198,19 @@ public class DeviceActivity extends AppCompatActivity {
     private float double2Float(double value) {
         return new Double(value).floatValue();
     }
+
+    private View.OnClickListener buttonOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.i(TAG, "query button clicked");
+            controller.requestData(getStartDate(), getEndDate());
+            if (isFirstSearch) {
+                currentChecked = DRAW_ELECTRICITY;
+                mCB_Electricity.setChecked(true);
+                isFirstSearch = false;
+            }
+        }
+    };
 
     private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
         @Override
@@ -244,6 +245,38 @@ public class DeviceActivity extends AppCompatActivity {
         }
     };
 
+    private View.OnClickListener checkboxOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.cb_current:
+                    if (currentChecked != DRAW_CURRENT) {
+                        mCB_Electricity.setChecked(false);
+                        mCB_U.setChecked(false);
+                        mCB_I.setChecked(true);
+                        currentChecked = DRAW_CURRENT;
+                    }
+                    break;
+                case R.id.cb_electricity:
+                    if (currentChecked != DRAW_ELECTRICITY) {
+                        mCB_U.setChecked(false);
+                        mCB_I.setChecked(false);
+                        mCB_Electricity.setChecked(true);
+                        currentChecked = DRAW_ELECTRICITY;
+                    }
+                    break;
+                case R.id.cb_U:
+                    if (currentChecked != DRAW_U) {
+                        mCB_Electricity.setChecked(false);
+                        mCB_I.setChecked(false);
+                        mCB_U.setChecked(true);
+                        currentChecked = DRAW_U;
+                    }
+                    break;
+            }
+        }
+    };
+
     Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -257,7 +290,7 @@ public class DeviceActivity extends AppCompatActivity {
                     int metric = bundle.getInt(METRIC);
                     int daysOfDifference = bundle.getInt(DAYS_OF_DIFFERENCE);
                     int start = bundle.getInt(START);
-                    invalidateChart((List<DeviceHistoryData>) msg.obj, daysOfDifference, metric, start, DRAW_ELECTRICITY);
+                    invalidateChart((List<DeviceHistoryData>) msg.obj, daysOfDifference, metric, start, currentChecked);
                     break;
                 case HANDLER_WHAT_UPDATE_LABEL:
                     Log.i(TAG, "handler ==> update label");

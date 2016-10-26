@@ -108,12 +108,14 @@
             android:text="@string/current" />
 
         <CheckBox
+            android:id="@+id/cb_U"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.33"
             android:text="@string/voltage" />
 
         <CheckBox
+            android:id="@+id/cb_electricity"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.33"

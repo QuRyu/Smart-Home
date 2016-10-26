@@ -5,7 +5,7 @@ import com.github.mikephil.charting.charts.LineChart;
 import java.util.List;
 
 /**
- * Created by Quentin on 20/10/2016.
+ * Wrapper class for parsing JSON data. 
  */
 public final class Result {
 
