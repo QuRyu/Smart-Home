@@ -7,4 +7,6 @@
     <color name="current">#90CAF9</color>
     <color name="voltage">#7E57C2</color>
     <color name="electricity">#FF5722</color>
+
+    <color name="divide_line">#94181616</color>
 </resources>
