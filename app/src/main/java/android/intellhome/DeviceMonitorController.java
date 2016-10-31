@@ -5,6 +5,10 @@ package android.intellhome;
  */
 public class DeviceMonitorController {
 
+    public DeviceMonitorController() {
+
+    }
+
     public void switchTurnOff() {
 
     }

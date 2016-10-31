@@ -1,6 +1,7 @@
 package android.intellhome;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.intellhome.entity.DeviceHistoryData;
 import android.os.Bundle;
@@ -300,7 +301,7 @@ public class DeviceHistoryActivity extends AppCompatActivity {
     private View.OnClickListener buttonOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Log.i(TAG, "query button clicked");
+            Log.i(TAG, "query mBT_switch clicked");
             try {
                 controller.requestData(getStartDate(), getEndDate());
             } catch (IOException e) {
