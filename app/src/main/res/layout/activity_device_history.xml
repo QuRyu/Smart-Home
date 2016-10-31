@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".DeviceActivity">
+    tools:context=".DeviceHistoryActivity">
 
     <LinearLayout
         android:id="@+id/datelayou"
@@ -119,26 +119,14 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.33"
-            android:text="@string/comsumption" />
+            android:text="@string/electricity" />
     </LinearLayout>
 
-    <com.github.mikephil.charting.charts.LineChart
+    <com.github.mikephil.charting.charts.CombinedChart
         android:id="@+id/linechart"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.5" />
 
-    <TextView
-        android:id="@+id/tv_deviceInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="电流：220V"
-        android:textSize="20sp" />
 
-    <Button
-        android:id="@+id/bt_history"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/history" />
 </LinearLayout>

@@ -20,9 +20,9 @@ import retrofit2.Response;
 /**
  * Created by Quentin on 20/10/2016.
  */
-public class DeviceHistoryController implements Callback<Result> {
+public class DeviceHistoryHistoryController implements Callback<Result> {
 
-    static final String TAG = "DeviceHistoryController";
+    static final String TAG = "DeviceHistoryHistoryController";
 
     public static final int METRIC_DAY = 1;
     public static final int METRIC_MONTH = 2;
@@ -38,7 +38,7 @@ public class DeviceHistoryController implements Callback<Result> {
     static final String MOCK_START_DATE = "20161007104353";
     static final String MOCK_END_DATE= "20161008004753";
 
-    public DeviceHistoryController(Handler handler) {
+    public DeviceHistoryHistoryController(Handler handler) {
         this.handler = handler;
     }
 
@@ -80,22 +80,22 @@ public class DeviceHistoryController implements Callback<Result> {
         Bundle bundle = new Bundle();
 
         if (numOfDays <= 30) {
-            bundle.putInt(DeviceActivity.METRIC, METRIC_DAY);
-            bundle.putInt(DeviceActivity.DAYS_OF_DIFFERENCE, numOfDays);
-//            bundle.putInt(DeviceActivity.START, RegExp.getDay(MOCK_START_DATE));
-            bundle.putInt(DeviceActivity.START, 7);
+            bundle.putInt(DeviceHistoryActivity.METRIC, METRIC_DAY);
+            bundle.putInt(DeviceHistoryActivity.DAYS_OF_DIFFERENCE, numOfDays);
+//            bundle.putInt(DeviceHistoryActivity.START, RegExp.getDay(MOCK_START_DATE));
+            bundle.putInt(DeviceHistoryActivity.START, 7);
 
         }
         else if (numOfDays <= 365) {
-            bundle.putInt(DeviceActivity.METRIC, METRIC_MONTH);
-            bundle.putInt(DeviceActivity.DAYS_OF_DIFFERENCE, computeMonth(numOfDays));
-            bundle.putInt(DeviceActivity.START, RegExp.getMonth(MOCK_START_DATE));
+            bundle.putInt(DeviceHistoryActivity.METRIC, METRIC_MONTH);
+            bundle.putInt(DeviceHistoryActivity.DAYS_OF_DIFFERENCE, computeMonth(numOfDays));
+            bundle.putInt(DeviceHistoryActivity.START, RegExp.getMonth(MOCK_START_DATE));
         }
 
         else{
-            bundle.putInt(DeviceActivity.METRIC, METRIC_YEAR);
-            bundle.putInt(DeviceActivity.DAYS_OF_DIFFERENCE, computeYear(numOfDays));
-            bundle.putInt(DeviceActivity.START, RegExp.getYear(MOCK_START_DATE));
+            bundle.putInt(DeviceHistoryActivity.METRIC, METRIC_YEAR);
+            bundle.putInt(DeviceHistoryActivity.DAYS_OF_DIFFERENCE, computeYear(numOfDays));
+            bundle.putInt(DeviceHistoryActivity.START, RegExp.getYear(MOCK_START_DATE));
         }
 
         message.setData(bundle);
