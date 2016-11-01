@@ -9,7 +9,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.LineChart;
 import com.zcw.togglebutton.ToggleButton;
 
 import java.util.HashMap;
@@ -20,11 +22,16 @@ import java.util.Map;
  */
 public class DeviceMonitorActivity extends AppCompatActivity {
 
+    static final String TAG = "DeviceMonitorActivity";
+
+    // used for identifying checkbox
     static final int CHECKBOX_CURRENT = 1;
     static final int CHECKBOX_VOLTAGE = 2;
     static final int CHECKBOX_ELECTRICITY = 3;
 
     private boolean toggleOn;
+
+    LineChart mChart;
 
     Button mBT_history;
     ToggleButton mBT_switch;
@@ -32,12 +39,12 @@ public class DeviceMonitorActivity extends AppCompatActivity {
     TextView mTV_component_name;
     TextView mTV_component_id;
 
-    CheckboxManager mCheckboxManager;
-
     CheckBox mCB_Current;
+
     CheckBox mCB_Voltage;
     CheckBox mCB_Electricity;
 
+    CheckboxManager mCheckboxManager;
     DeviceMonitorController controller;
 
     @Override
@@ -45,8 +52,11 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_monitor);
 
+
+        // initialize controller
         controller = new DeviceMonitorController();
 
+        // initialize buttons
         mBT_history = (Button) findViewById(R.id.bt_history);
         mBT_history.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,18 +72,30 @@ public class DeviceMonitorActivity extends AppCompatActivity {
             public void onClick(View v) {
                 toggleOn = !toggleOn;
                 mBT_switch.toggle();
+                if (toggleOn)
+                    Toast.makeText(getApplicationContext(), "the switch is now on",
+                            Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(getApplicationContext(), "the switch is now off",
+                            Toast.LENGTH_SHORT).show();
             }
         });
 
+        // initialize textView
         mTV_component_id = (TextView) findViewById(R.id.tv_component_id);
         mTV_component_name = (TextView) findViewById(R.id.tv_component_name);
 
         mTV_component_name.setText("卧室智能开关");
         mTV_component_id.setText("IP:192");
 
+
+        // initialize checkbox and checkbox manager 
         mCB_Current = (CheckBox) findViewById(R.id.cb_current);
+        mCB_Current.setOnClickListener(checkboxListener);
         mCB_Electricity = (CheckBox) findViewById(R.id.cb_electricity);
+        mCB_Electricity.setOnClickListener(checkboxListener);
         mCB_Voltage = (CheckBox) findViewById(R.id.cb_U);
+        mCB_Voltage.setOnClickListener(checkboxListener);
 
         Map<Integer, CheckBox> map = new HashMap<>();
         map.put(CHECKBOX_CURRENT, mCB_Current);
@@ -83,5 +105,20 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         mCheckboxManager = new CheckboxManager(map);
     }
 
-    
+    private View.OnClickListener checkboxListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.cb_current:
+                    mCheckboxManager.setChecked(CHECKBOX_CURRENT);
+                    break;
+                case R.id.cb_electricity:
+                    mCheckboxManager.setChecked(CHECKBOX_ELECTRICITY);
+                    break;
+                case R.id.cb_U:
+                    mCheckboxManager.setChecked(CHECKBOX_VOLTAGE);
+                    break;
+            }
+        }
+    };
 }

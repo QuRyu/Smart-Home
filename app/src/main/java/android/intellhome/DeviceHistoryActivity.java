@@ -1,7 +1,6 @@
 package android.intellhome;
 
 import android.app.DatePickerDialog;
-import android.content.Intent;
 import android.graphics.Color;
 import android.intellhome.entity.DeviceHistoryData;
 import android.os.Bundle;
@@ -69,10 +68,10 @@ public class DeviceHistoryActivity extends AppCompatActivity {
     // TODO: 24/10/2016 Error Date checking
     CombinedChart mChart;
 
-    Button mBt_search;
+    Button mBT_search;
 
-    EditText mStartDate;
-    EditText mEndDate;
+    EditText mET_StartDate;
+    EditText mET_EndDate;
 
     CheckBox mCB_Electricity;
     CheckBox mCB_U;
@@ -93,14 +92,14 @@ public class DeviceHistoryActivity extends AppCompatActivity {
 
         controller = new DeviceHistoryHistoryController(mHandler);
 
-        mBt_search = (Button) findViewById(R.id.bt_search);
-        mBt_search.setOnClickListener(buttonOnClickListener);
+        mBT_search = (Button) findViewById(R.id.bt_search);
+        mBT_search.setOnClickListener(buttonOnClickListener);
 
 
-        mStartDate = (EditText) findViewById(R.id.tv_startDate);
-        mStartDate.setOnClickListener(textViewOnClickListener);
-        mEndDate = (EditText) findViewById(R.id.tv_endDate);
-        mEndDate.setOnClickListener(textViewOnClickListener);
+        mET_StartDate = (EditText) findViewById(R.id.tv_startDate);
+        mET_StartDate.setOnClickListener(textViewOnClickListener);
+        mET_EndDate = (EditText) findViewById(R.id.tv_endDate);
+        mET_EndDate.setOnClickListener(textViewOnClickListener);
 
         mCB_Electricity = (CheckBox) findViewById(R.id.cb_electricity);
         mCB_Electricity.setOnClickListener(checkboxOnClickListener);
@@ -188,6 +187,7 @@ public class DeviceHistoryActivity extends AppCompatActivity {
 
         xAxis.setAxisMaxValue(historyData.size() + start + 0.25f);
         mChart.setData(combinedData);
+        mChart.notifyDataSetChanged();
         mChart.invalidate();
         Log.i(TAG, "finish rendering chart");
     }
@@ -408,10 +408,10 @@ public class DeviceHistoryActivity extends AppCompatActivity {
                     String text = calendar.get(Calendar.YEAR) + " " + calendar.get(Calendar.MONTH) + " " + calendar.get(Calendar.DAY_OF_MONTH);
                     switch (flag_date) {
                         case FLAG_START_DATE:
-                            mStartDate.setText(text);
+                            mET_StartDate.setText(text);
                             break;
                         case FLAG_END_DATE:
-                            mEndDate.setText(text);
+                            mET_EndDate.setText(text);
                             break;
                         default:
                             throw new IllegalArgumentException("wrong flag_date");

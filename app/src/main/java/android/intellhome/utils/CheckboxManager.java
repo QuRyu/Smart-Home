@@ -25,10 +25,7 @@ public class CheckboxManager {
     }
 
     private void setAllOff() {
-        Iterator it = checkboxes.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<Integer, ? extends CheckBox> pair = (Map.Entry<Integer, ? extends CheckBox>) it.next();
-            pair.getValue().setChecked(false);
-        }
+        for (CheckBox cb: checkboxes.values())
+            cb.setChecked(false);
     }
 }

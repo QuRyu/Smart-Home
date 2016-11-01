@@ -104,7 +104,7 @@
         android:layout_height="1dp"
         android:background="@color/divide_line" />
 
-    <com.github.mikephil.charting.charts.CombinedChart
+    <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/linechart"
         android:layout_width="match_parent"
         android:layout_height="0dp"
