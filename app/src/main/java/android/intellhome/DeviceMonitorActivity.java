@@ -3,6 +3,7 @@ package android.intellhome;
 import android.content.Intent;
 import android.intellhome.utils.CheckboxManager;
 import android.os.Bundle;
+import android.support.annotation.BoolRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,12 +14,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.zcw.togglebutton.ToggleButton;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
@@ -127,6 +132,22 @@ public class DeviceMonitorActivity extends AppCompatActivity {
             Log.i(TAG, "startDrawChart: start to draw chart");
             drawingChart = true;
 
+            LineData data = null;
+            switch (mCheckboxManager.getCurrentChecked()) {
+                case CHECKBOX_CURRENT:
+                    data = generateLineData(5, "Current");
+                    break;
+                case CHECKBOX_ELECTRICITY:
+                    data = generateLineData(100, "Current");
+                    break;
+                case CHECKBOX_VOLTAGE:
+                    data = generateLineData(230, "Voltage");
+                    break;
+            }
+
+            mChart.setData(data);
+            mChart.notifyDataSetChanged();
+            mChart.invalidate();
         }
     }
 
@@ -135,11 +156,16 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         drawingChart = false;
     }
 
-    private LineData generateLineData() {
+    private LineData generateLineData(int max, String label) {
         LineData lineData = new LineData();
-        
+        Random random = new Random();
+        List<Entry> entries = new ArrayList<>();
+        for (int i=0; i<20; ++i)
+            entries.add(new Entry(i, random.nextInt(max)));
 
-        return null;
+        LineDataSet dataSet = new LineDataSet(entries, label);
+        lineData.addDataSet(dataSet);
+        return lineData;
     }
 
 
