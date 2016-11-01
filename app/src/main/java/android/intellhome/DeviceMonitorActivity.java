@@ -25,6 +25,7 @@ public class DeviceMonitorActivity extends AppCompatActivity {
     static final String TAG = "DeviceMonitorActivity";
 
     // used for identifying checkbox
+    static final int CHECKBOX_NO_SELECTION = -1;
     static final int CHECKBOX_CURRENT = 1;
     static final int CHECKBOX_VOLTAGE = 2;
     static final int CHECKBOX_ELECTRICITY = 3;
@@ -56,6 +57,9 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         // initialize controller
         controller = new DeviceMonitorController();
 
+        // initialize chart
+        mChart = (LineChart) findViewById(R.id.linechart);
+
         // initialize buttons
         mBT_history = (Button) findViewById(R.id.bt_history);
         mBT_history.setOnClickListener(new View.OnClickListener() {
@@ -78,6 +82,11 @@ public class DeviceMonitorActivity extends AppCompatActivity {
                 else
                     Toast.makeText(getApplicationContext(), "the switch is now off",
                             Toast.LENGTH_SHORT).show();
+
+                if (toggleOn)
+                    startDrawChart();
+                else // the switch is turned off
+                    stopDrawChart();
             }
         });
 
@@ -89,7 +98,7 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         mTV_component_id.setText("IP:192");
 
 
-        // initialize checkbox and checkbox manager 
+        // initialize checkbox and checkbox manager
         mCB_Current = (CheckBox) findViewById(R.id.cb_current);
         mCB_Current.setOnClickListener(checkboxListener);
         mCB_Electricity = (CheckBox) findViewById(R.id.cb_electricity);
@@ -105,20 +114,35 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         mCheckboxManager = new CheckboxManager(map);
     }
 
+    private void startDrawChart() {
+        if (toggleOn && mCheckboxManager.getCurrentChecked() != CHECKBOX_NO_SELECTION) {
+
+        }
+    }
+
+    private void stopDrawChart() {
+
+    }
+
+
     private View.OnClickListener checkboxListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.cb_current:
-                    mCheckboxManager.setChecked(CHECKBOX_CURRENT);
+                    mCheckboxManager.checkToggle(CHECKBOX_CURRENT);
                     break;
                 case R.id.cb_electricity:
-                    mCheckboxManager.setChecked(CHECKBOX_ELECTRICITY);
+                    mCheckboxManager.checkToggle(CHECKBOX_ELECTRICITY);
                     break;
                 case R.id.cb_U:
-                    mCheckboxManager.setChecked(CHECKBOX_VOLTAGE);
+                    mCheckboxManager.checkToggle(CHECKBOX_VOLTAGE);
                     break;
             }
+            if (mCheckboxManager.getCurrentChecked() != CHECKBOX_NO_SELECTION)
+                startDrawChart();
+            else // all checkboxes are unselected 
+                stopDrawChart();
         }
     };
 }

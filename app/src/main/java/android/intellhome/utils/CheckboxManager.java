@@ -12,16 +12,33 @@ public class CheckboxManager {
 
     private Map<Integer, ? extends CheckBox> checkboxes;
 
+    private int currentChecked;
+
     public CheckboxManager(Map<Integer, ? extends CheckBox> checkboxes) {
         this.checkboxes = checkboxes;
+        currentChecked = -1;
     }
 
-    public void setChecked(int i) {
-        setAllOff();
-        if (checkboxes.containsKey(i))
-            checkboxes.get(i).setChecked(true);
+    public void checkToggle(int i) {
+        if (checkboxes.containsKey(i)) {
+            if (currentChecked == i) {
+                // toggle branch
+                currentChecked = -1;
+                checkboxes.get(i).setChecked(false);
+            }
+            else {
+                setAllOff();
+                checkboxes.get(i).setChecked(true);
+                currentChecked = i;
+            }
+        }
         else
             throw new RuntimeException("key does not exist");
+
+    }
+
+    public int getCurrentChecked() {
+        return currentChecked;
     }
 
     private void setAllOff() {
