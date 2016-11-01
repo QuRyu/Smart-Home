@@ -3,6 +3,8 @@ package android.intellhome;
 import android.content.Intent;
 import android.intellhome.utils.CheckboxManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -22,6 +24,7 @@ import com.zcw.togglebutton.ToggleButton;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Random;
 
 /**
@@ -37,15 +40,22 @@ public class DeviceMonitorActivity extends AppCompatActivity {
     static final int CHECKBOX_VOLTAGE = 2;
     static final int CHECKBOX_ELECTRICITY = 3;
 
+    static final int HANDLER_UPDATE_CHART = 1;
+
     static final int maxItemsToShow = 10;
 
     private boolean toggleOn;
     private boolean drawingChart;
 
+    // self-defined helper class
     ChartThread drawingThread;
+    CheckboxManager mCheckboxManager;
+    DeviceMonitorController controller;
 
-    LineChart mChart;
 
+    Random random;
+
+    // UI component
     Button mBT_history;
     ToggleButton mBT_switch;
 
@@ -57,15 +67,19 @@ public class DeviceMonitorActivity extends AppCompatActivity {
     CheckBox mCB_Voltage;
     CheckBox mCB_Electricity;
 
-    CheckboxManager mCheckboxManager;
-    DeviceMonitorController controller;
+
+    // chart
+    LineData lineData;
+    LineDataSet lineDataSet;
+    LineChart mChart;
+    LinkedList<Entry> queue;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_monitor);
 
-
+        random = new Random();
         // initialize controller
         controller = new DeviceMonitorController();
 
@@ -88,12 +102,6 @@ public class DeviceMonitorActivity extends AppCompatActivity {
             public void onClick(View v) {
                 toggleOn = !toggleOn;
                 mBT_switch.toggle();
-                if (toggleOn)
-                    Toast.makeText(getApplicationContext(), "the switch is now on",
-                            Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(getApplicationContext(), "the switch is now off",
-                            Toast.LENGTH_SHORT).show();
 
                 if (toggleOn)
                     startDrawChart();
@@ -131,18 +139,8 @@ public class DeviceMonitorActivity extends AppCompatActivity {
             Log.i(TAG, "startDrawChart: start to draw chart");
             drawingChart = true;
 
-//            drawingThread = new ChartThread(mChart, )
-            switch (mCheckboxManager.getCurrentChecked()) {
-                case CHECKBOX_CURRENT:
-                    drawingThread = new ChartThread(mChart, 5, maxItemsToShow, "CURRENT");
-                    break;
-                case CHECKBOX_ELECTRICITY:
-                    drawingThread = new ChartThread(mChart, 100, maxItemsToShow, "ELECTRICITY");
-                    break;
-                case CHECKBOX_VOLTAGE:
-                    drawingThread = new ChartThread(mChart, 225, maxItemsToShow, "VOLTAGE");
-                    break;
-            }
+            queue = new LinkedList<>();
+            drawingThread = new ChartThread();
 
             drawingThread.start();
         }
@@ -151,11 +149,27 @@ public class DeviceMonitorActivity extends AppCompatActivity {
     private void stopDrawChart() {
         Log.i(TAG, "stopDrawChart: stop drawing chart");
         drawingChart = false;
-        
+
         drawingThread.interrupt();
+        drawingThread = null;
+
+        queue = null;
+
+        mChart.clear();
     }
 
-
+    private String getCheckboxLabel() {
+        switch (mCheckboxManager.getCurrentChecked()) {
+            case CHECKBOX_CURRENT:
+                return getString(R.string.current);
+            case CHECKBOX_ELECTRICITY:
+                return getString(R.string.electricity);
+            case CHECKBOX_VOLTAGE:
+                return getString(R.string.voltage);
+            default:
+                return "LABEL";
+        }
+    }
 
     private View.OnClickListener checkboxListener = new View.OnClickListener() {
         @Override
@@ -171,43 +185,32 @@ public class DeviceMonitorActivity extends AppCompatActivity {
                     mCheckboxManager.checkToggle(CHECKBOX_VOLTAGE);
                     break;
             }
-            if (mCheckboxManager.getCurrentChecked() != CHECKBOX_NO_SELECTION)
+            if (mCheckboxManager.getCurrentChecked() != CHECKBOX_NO_SELECTION && !drawingChart) {
                 startDrawChart();
+            }
             else if (drawingChart)// all checkboxes are unselected
                 stopDrawChart();
+            else if (mCheckboxManager.getCurrentChecked() != CHECKBOX_NO_SELECTION && drawingChart) {
+                stopDrawChart();
+                startDrawChart();
+            }
+
         }
     };
 
 
     // TODO: 01/11/2016 use queue to add new elements
     private class ChartThread extends Thread {
-        private LineChart mChart;
-        private int range;
-        private int maxItems; // max items to show
-        private String label; // for legendj
-
-        private Random random;
-        private LinkedList<Entry> queue;
 
         private boolean run = true;
 
-
-        public ChartThread(LineChart mChart, int range, int maxItems, String label) {
-            this.mChart = mChart;
-            this.range = range;
-            this.maxItems = maxItems;
-            this.label = label;
-
-            random = new Random();
-            queue = new LinkedList<>();
+        public ChartThread() {
 
         }
 
         @Override
         public synchronized void start() {
             super.start();
-
-
         }
 
         @Override
@@ -215,27 +218,9 @@ public class DeviceMonitorActivity extends AppCompatActivity {
             super.run();
             Log.i(TAG, "start: drawing thread running");
             // initialize lineData and lineDataSet
-            LineData lineData = mChart.getLineData();
-            LineDataSet lineDataSet = null;
-            if (lineData == null) {
-                lineData = new LineData();
-                lineDataSet = new LineDataSet(queue, label);
-                lineData.addDataSet(lineDataSet);
-            }
-            else {
-                lineDataSet = (LineDataSet) lineData.getDataSetByIndex(0);
-                if (lineDataSet == null) {
-                    lineDataSet = new LineDataSet(queue, label);
-                    lineData.addDataSet(lineDataSet);
-                }
-            }
-
 
             while (run) {
-                int y = random.nextInt(range);
-                add(new Entry(0, y));
-                mChart.notifyDataSetChanged();
-                mChart.invalidate();
+                mHandler.sendEmptyMessage(HANDLER_UPDATE_CHART);
 
                 try {
                     Thread.sleep(1000);
@@ -251,26 +236,43 @@ public class DeviceMonitorActivity extends AppCompatActivity {
             run = false;
         }
 
-        private void add(Entry e) {
-            allEntriesDecrement();
-            if (queue.size() < maxItems) {
-                queue.add(e);
-            }
-            else {
-                queue.add(e);
-                queue.remove();
-            }
-
-        }
-
-
-
-        private void allEntriesDecrement() {
-            for (Entry entry: queue) {
-                entry.setX(entry.getX() - 1);
-            }
-        }
-
     }
 
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case HANDLER_UPDATE_CHART:
+                    lineData = mChart.getLineData();
+                    if (lineData == null) {
+                        lineData = new LineData();
+                        mChart.setData(lineData);
+                    }
+
+                    int y = random.nextInt(10);
+                    addNewEntry(y);
+                    LineDataSet lineDataSet = new LineDataSet(queue, getCheckboxLabel());
+                    lineData.removeDataSet(0);
+                    lineData.addDataSet(lineDataSet);
+                    mChart.notifyDataSetChanged();
+                    mChart.invalidate();
+                    break;
+            }
+        }
+    };
+
+
+    private void addNewEntry(int y) {
+        if (queue.size() < maxItemsToShow)
+            queue.add(new Entry(10, y));
+        else {
+            queue.remove();
+            for (Entry entry : queue) {
+                entry.setX(entry.getX()-1);
+            }
+            queue.add(new Entry(maxItemsToShow, y));
+        }
+    }
 }
