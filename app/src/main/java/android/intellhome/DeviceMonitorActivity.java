@@ -3,7 +3,6 @@ package android.intellhome;
 import android.content.Intent;
 import android.intellhome.utils.CheckboxManager;
 import android.os.Bundle;
-import android.support.annotation.BoolRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,21 +12,17 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.zcw.togglebutton.ToggleButton;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by Quentin on 31/10/2016.
@@ -42,8 +37,12 @@ public class DeviceMonitorActivity extends AppCompatActivity {
     static final int CHECKBOX_VOLTAGE = 2;
     static final int CHECKBOX_ELECTRICITY = 3;
 
+    static final int maxItemsToShow = 10;
+
     private boolean toggleOn;
     private boolean drawingChart;
+
+    ChartThread drawingThread;
 
     LineChart mChart;
 
@@ -132,41 +131,30 @@ public class DeviceMonitorActivity extends AppCompatActivity {
             Log.i(TAG, "startDrawChart: start to draw chart");
             drawingChart = true;
 
-            LineData data = null;
+//            drawingThread = new ChartThread(mChart, )
             switch (mCheckboxManager.getCurrentChecked()) {
                 case CHECKBOX_CURRENT:
-                    data = generateLineData(5, "Current");
+                    drawingThread = new ChartThread(mChart, 5, maxItemsToShow, "CURRENT");
                     break;
                 case CHECKBOX_ELECTRICITY:
-                    data = generateLineData(100, "Current");
+                    drawingThread = new ChartThread(mChart, 100, maxItemsToShow, "ELECTRICITY");
                     break;
                 case CHECKBOX_VOLTAGE:
-                    data = generateLineData(230, "Voltage");
+                    drawingThread = new ChartThread(mChart, 225, maxItemsToShow, "VOLTAGE");
                     break;
             }
 
-            mChart.setData(data);
-            mChart.notifyDataSetChanged();
-            mChart.invalidate();
+            drawingThread.start();
         }
     }
 
     private void stopDrawChart() {
         Log.i(TAG, "stopDrawChart: stop drawing chart");
         drawingChart = false;
+        
+        drawingThread.interrupt();
     }
 
-    private LineData generateLineData(int max, String label) {
-        LineData lineData = new LineData();
-        Random random = new Random();
-        List<Entry> entries = new ArrayList<>();
-        for (int i=0; i<20; ++i)
-            entries.add(new Entry(i, random.nextInt(max)));
-
-        LineDataSet dataSet = new LineDataSet(entries, label);
-        lineData.addDataSet(dataSet);
-        return lineData;
-    }
 
 
     private View.OnClickListener checkboxListener = new View.OnClickListener() {
@@ -194,24 +182,60 @@ public class DeviceMonitorActivity extends AppCompatActivity {
     // TODO: 01/11/2016 use queue to add new elements
     private class ChartThread extends Thread {
         private LineChart mChart;
+        private int range;
+        private int maxItems; // max items to show
+        private String label; // for legendj
+
         private Random random;
-        private int max;
+        private LinkedList<Entry> queue;
 
-        private Queue<Integer> queue;
+        private boolean run = true;
 
-        public ChartThread(LineChart mChart, int max) {
+
+        public ChartThread(LineChart mChart, int range, int maxItems, String label) {
             this.mChart = mChart;
-            this.max = max;
+            this.range = range;
+            this.maxItems = maxItems;
+            this.label = label;
 
             random = new Random();
             queue = new LinkedList<>();
+
         }
 
         @Override
         public synchronized void start() {
             super.start();
-            while (true) {
-                int y = random.nextInt(max);
+
+
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            Log.i(TAG, "start: drawing thread running");
+            // initialize lineData and lineDataSet
+            LineData lineData = mChart.getLineData();
+            LineDataSet lineDataSet = null;
+            if (lineData == null) {
+                lineData = new LineData();
+                lineDataSet = new LineDataSet(queue, label);
+                lineData.addDataSet(lineDataSet);
+            }
+            else {
+                lineDataSet = (LineDataSet) lineData.getDataSetByIndex(0);
+                if (lineDataSet == null) {
+                    lineDataSet = new LineDataSet(queue, label);
+                    lineData.addDataSet(lineDataSet);
+                }
+            }
+
+
+            while (run) {
+                int y = random.nextInt(range);
+                add(new Entry(0, y));
+                mChart.notifyDataSetChanged();
+                mChart.invalidate();
 
                 try {
                     Thread.sleep(1000);
@@ -221,18 +245,32 @@ public class DeviceMonitorActivity extends AppCompatActivity {
             }
         }
 
-        private class QueueWrapper {
-            private Queue<Integer> queue;
-            private int maxItems;
+        @Override
+        public void interrupt() {
+            super.interrupt();
+            run = false;
+        }
 
-            public QueueWrapper(int maxItems) {
-                this.maxItems = maxItems;
-                queue = new LinkedList<>();
+        private void add(Entry e) {
+            allEntriesDecrement();
+            if (queue.size() < maxItems) {
+                queue.add(e);
+            }
+            else {
+                queue.add(e);
+                queue.remove();
             }
 
-            
         }
-    }
 
+
+
+        private void allEntriesDecrement() {
+            for (Entry entry: queue) {
+                entry.setX(entry.getX() - 1);
+            }
+        }
+
+    }
 
 }
