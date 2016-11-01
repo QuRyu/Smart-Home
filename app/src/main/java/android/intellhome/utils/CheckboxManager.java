@@ -10,6 +10,13 @@ import java.util.Map;
  */
 public class CheckboxManager {
 
+    // used for identifying checkbox
+    public static final int CHECKBOX_NO_SELECTION = -1;
+    public static final int CHECKBOX_CURRENT = 1;
+    public static final int CHECKBOX_VOLTAGE = 2;
+    public static final int CHECKBOX_ELECTRICITY = 3;
+
+    
     private Map<Integer, ? extends CheckBox> checkboxes;
 
     private int currentChecked;

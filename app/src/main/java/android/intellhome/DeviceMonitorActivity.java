@@ -12,9 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -24,7 +22,6 @@ import com.zcw.togglebutton.ToggleButton;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Random;
 
 /**
@@ -33,12 +30,6 @@ import java.util.Random;
 public class DeviceMonitorActivity extends AppCompatActivity {
 
     static final String TAG = "DeviceMonitorActivity";
-
-    // used for identifying checkbox
-    static final int CHECKBOX_NO_SELECTION = -1;
-    static final int CHECKBOX_CURRENT = 1;
-    static final int CHECKBOX_VOLTAGE = 2;
-    static final int CHECKBOX_ELECTRICITY = 3;
 
     static final int HANDLER_UPDATE_CHART = 1;
 
@@ -127,15 +118,15 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         mCB_Voltage.setOnClickListener(checkboxListener);
 
         Map<Integer, CheckBox> map = new HashMap<>();
-        map.put(CHECKBOX_CURRENT, mCB_Current);
-        map.put(CHECKBOX_VOLTAGE, mCB_Voltage);
-        map.put(CHECKBOX_ELECTRICITY, mCB_Electricity);
+        map.put(CheckboxManager.CHECKBOX_CURRENT, mCB_Current);
+        map.put(CheckboxManager.CHECKBOX_VOLTAGE, mCB_Voltage);
+        map.put(CheckboxManager.CHECKBOX_ELECTRICITY, mCB_Electricity);
 
         mCheckboxManager = new CheckboxManager(map);
     }
 
     private void startDrawChart() {
-        if (toggleOn && mCheckboxManager.getCurrentChecked() != CHECKBOX_NO_SELECTION) {
+        if (toggleOn && mCheckboxManager.getCurrentChecked() != CheckboxManager.CHECKBOX_NO_SELECTION) {
             Log.i(TAG, "startDrawChart: start to draw chart");
             drawingChart = true;
 
@@ -160,11 +151,11 @@ public class DeviceMonitorActivity extends AppCompatActivity {
 
     private String getCheckboxLabel() {
         switch (mCheckboxManager.getCurrentChecked()) {
-            case CHECKBOX_CURRENT:
+            case CheckboxManager.CHECKBOX_CURRENT:
                 return getString(R.string.current);
-            case CHECKBOX_ELECTRICITY:
+            case CheckboxManager.CHECKBOX_ELECTRICITY:
                 return getString(R.string.electricity);
-            case CHECKBOX_VOLTAGE:
+            case CheckboxManager.CHECKBOX_VOLTAGE:
                 return getString(R.string.voltage);
             default:
                 return "LABEL";
@@ -176,21 +167,21 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.cb_current:
-                    mCheckboxManager.checkToggle(CHECKBOX_CURRENT);
+                    mCheckboxManager.checkToggle(CheckboxManager.CHECKBOX_CURRENT);
                     break;
                 case R.id.cb_electricity:
-                    mCheckboxManager.checkToggle(CHECKBOX_ELECTRICITY);
+                    mCheckboxManager.checkToggle(CheckboxManager.CHECKBOX_ELECTRICITY);
                     break;
                 case R.id.cb_U:
-                    mCheckboxManager.checkToggle(CHECKBOX_VOLTAGE);
+                    mCheckboxManager.checkToggle(CheckboxManager.CHECKBOX_VOLTAGE);
                     break;
             }
-            if (mCheckboxManager.getCurrentChecked() != CHECKBOX_NO_SELECTION && !drawingChart) {
+            if (mCheckboxManager.getCurrentChecked() != CheckboxManager.CHECKBOX_NO_SELECTION && !drawingChart) {
                 startDrawChart();
             }
             else if (drawingChart)// all checkboxes are unselected
                 stopDrawChart();
-            else if (mCheckboxManager.getCurrentChecked() != CHECKBOX_NO_SELECTION && drawingChart) {
+            else if (mCheckboxManager.getCurrentChecked() != CheckboxManager.CHECKBOX_NO_SELECTION && drawingChart) {
                 stopDrawChart();
                 startDrawChart();
             }

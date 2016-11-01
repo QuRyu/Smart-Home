@@ -16,4 +16,8 @@ public class DeviceMonitorController {
     public void switchTurnOn() {
 
     }
+
+    public void startDrawing() {
+
+    }
 }
