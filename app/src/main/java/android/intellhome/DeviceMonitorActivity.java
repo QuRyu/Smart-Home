@@ -5,6 +5,7 @@ import android.intellhome.utils.CheckboxManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -12,10 +13,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.LineData;
 import com.zcw.togglebutton.ToggleButton;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by Quentin on 31/10/2016.
@@ -31,6 +38,7 @@ public class DeviceMonitorActivity extends AppCompatActivity {
     static final int CHECKBOX_ELECTRICITY = 3;
 
     private boolean toggleOn;
+    private boolean drawingChart;
 
     LineChart mChart;
 
@@ -85,7 +93,7 @@ public class DeviceMonitorActivity extends AppCompatActivity {
 
                 if (toggleOn)
                     startDrawChart();
-                else // the switch is turned off
+                else if (drawingChart)// the switch is turned off
                     stopDrawChart();
             }
         });
@@ -116,12 +124,22 @@ public class DeviceMonitorActivity extends AppCompatActivity {
 
     private void startDrawChart() {
         if (toggleOn && mCheckboxManager.getCurrentChecked() != CHECKBOX_NO_SELECTION) {
+            Log.i(TAG, "startDrawChart: start to draw chart");
+            drawingChart = true;
 
         }
     }
 
     private void stopDrawChart() {
+        Log.i(TAG, "stopDrawChart: stop drawing chart");
+        drawingChart = false;
+    }
 
+    private LineData generateLineData() {
+        LineData lineData = new LineData();
+        
+
+        return null;
     }
 
 
@@ -141,8 +159,54 @@ public class DeviceMonitorActivity extends AppCompatActivity {
             }
             if (mCheckboxManager.getCurrentChecked() != CHECKBOX_NO_SELECTION)
                 startDrawChart();
-            else // all checkboxes are unselected 
+            else if (drawingChart)// all checkboxes are unselected
                 stopDrawChart();
         }
     };
+
+
+    // TODO: 01/11/2016 use queue to add new elements
+    private class ChartThread extends Thread {
+        private LineChart mChart;
+        private Random random;
+        private int max;
+
+        private Queue<Integer> queue;
+
+        public ChartThread(LineChart mChart, int max) {
+            this.mChart = mChart;
+            this.max = max;
+
+            random = new Random();
+            queue = new LinkedList<>();
+        }
+
+        @Override
+        public synchronized void start() {
+            super.start();
+            while (true) {
+                int y = random.nextInt(max);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private class QueueWrapper {
+            private Queue<Integer> queue;
+            private int maxItems;
+
+            public QueueWrapper(int maxItems) {
+                this.maxItems = maxItems;
+                queue = new LinkedList<>();
+            }
+
+            
+        }
+    }
+
+
 }
