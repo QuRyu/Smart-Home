@@ -1,5 +1,7 @@
 package android.intellhome.utils;
 
+import android.graphics.Color;
+import android.intellhome.R;
 import android.widget.CheckBox;
 
 import java.util.ArrayList;
@@ -13,9 +15,9 @@ public class CheckboxManager {
 
     // used for identifying checkbox
     public static final int CHECKBOX_NO_SELECTION = -1;
-    public static final int CHECKBOX_CURRENT = 1;
-    public static final int CHECKBOX_VOLTAGE = 2;
-    public static final int CHECKBOX_ELECTRICITY = 3;
+    public static final int CHECKBOX_CURRENT = 0;
+    public static final int CHECKBOX_VOLTAGE = 1;
+    public static final int CHECKBOX_ELECTRICITY = 2;
 
 
     private Map<Integer, ? extends CheckBox> checkboxes;
@@ -67,7 +69,34 @@ public class CheckboxManager {
     public int getCheckedNum() {
         int result = 0;
         for (boolean b: checked)
-            ++result;
+            if (b) ++result;
         return result;
     }
+
+    public String getCorrespondingLabel(int i) {
+        switch (i) {
+            case CHECKBOX_CURRENT:
+                return "Current";
+            case CHECKBOX_ELECTRICITY:
+                return "Electricity";
+            case CHECKBOX_VOLTAGE:
+                return "Voltage";
+            default:
+                return "Default";
+        }
+    }
+
+    public int getCorrespondingColor(int i) {
+        switch (i) {
+            case CHECKBOX_CURRENT:
+                return Color.parseColor("#90CAF9");
+            case CHECKBOX_ELECTRICITY:
+                return Color.parseColor("#FF5722");
+            case CHECKBOX_VOLTAGE:
+                return Color.parseColor("#7E57C2");
+            default:
+                return Color.parseColor("#94181616");
+        }
+    }
+
 }

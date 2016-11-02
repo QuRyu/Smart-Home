@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * Created by Quentin on 31/10/2016.
  */
-public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
+public class DeviceMonitorActivity extends AppCompatActivity {
 
     public static final int HANDLER_UPDATE_CHART = 1;
 
@@ -65,13 +65,24 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
         mChart.setDescription("");
         mChart.getXAxis().setEnabled(false);
         mChart.getAxisRight().setEnabled(false);
-        mChart.getLegend().setEnabled(false);
 
         lineData = new LineData();
         mChart.setData(lineData);
 
-        // initialize controller
-        controller = new DeviceMonitorController(mHandler, this, mCheckboxManager, lineData);
+        // initialize checkbox and checkbox manager
+        mCB_Current = (CheckBox) findViewById(R.id.cb_current);
+        mCB_Current.setOnClickListener(checkboxListener);
+        mCB_Electricity = (CheckBox) findViewById(R.id.cb_electricity);
+        mCB_Electricity.setOnClickListener(checkboxListener);
+        mCB_Voltage = (CheckBox) findViewById(R.id.cb_U);
+        mCB_Voltage.setOnClickListener(checkboxListener);
+
+        Map<Integer, CheckBox> map = new HashMap<>();
+        map.put(CheckboxManager.CHECKBOX_CURRENT, mCB_Current);
+        map.put(CheckboxManager.CHECKBOX_VOLTAGE, mCB_Voltage);
+        map.put(CheckboxManager.CHECKBOX_ELECTRICITY, mCB_Electricity);
+
+        mCheckboxManager = new CheckboxManager(map);
 
 
         // initialize buttons
@@ -108,41 +119,31 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
         mTV_component_id.setText("IP:192");
 
 
-        // initialize checkbox and checkbox manager
-        mCB_Current = (CheckBox) findViewById(R.id.cb_current);
-        mCB_Current.setOnClickListener(checkboxListener);
-        mCB_Electricity = (CheckBox) findViewById(R.id.cb_electricity);
-        mCB_Electricity.setOnClickListener(checkboxListener);
-        mCB_Voltage = (CheckBox) findViewById(R.id.cb_U);
-        mCB_Voltage.setOnClickListener(checkboxListener);
+        // initialize controller
+        controller = new DeviceMonitorController(mHandler, mCheckboxManager, lineData);
 
-        Map<Integer, CheckBox> map = new HashMap<>();
-        map.put(CheckboxManager.CHECKBOX_CURRENT, mCB_Current);
-        map.put(CheckboxManager.CHECKBOX_VOLTAGE, mCB_Voltage);
-        map.put(CheckboxManager.CHECKBOX_ELECTRICITY, mCB_Electricity);
-
-        mCheckboxManager = new CheckboxManager(map);
     }
 
-    @Override
     public void startDrawChart() {
         if (toggleOn && mCheckboxManager.isChecked()) {
+            // clear previously drawn chart, if there is any
+            mChart.clearValues();
+            mChart.notifyDataSetChanged();
+            mChart.invalidate();
+
+
             Log.i(TAG, "startDrawChart: start to draw chart");
             drawingChart = true;
             controller.startDrawing();
         }
     }
 
-    @Override
+
     public void stopDrawChart() {
         Log.i(TAG, "stopDrawChart: stop drawing chart");
         drawingChart = false;
 
         controller.stopDrawing();
-
-        mChart.clearValues();
-        mChart.notifyDataSetChanged();
-        mChart.invalidate();
     }
 
     private View.OnClickListener checkboxListener = new View.OnClickListener() {

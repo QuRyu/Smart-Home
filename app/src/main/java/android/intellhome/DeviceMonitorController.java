@@ -23,19 +23,19 @@ public class DeviceMonitorController {
     private LineData lineData;
     private Handler mHandler;
 
-    private Draw drawer;
-    private QueueManager dataManager;
+    private QueueManager[] dataManager;
 
     private RequestCurrentData<Integer> request;
-    private LineDataSet lineDataSet;
 
     private ChartThread drawingThread;
 
-    public DeviceMonitorController(Handler handler, Draw draw, CheckboxManager checkboxManager, LineData lineData) {
+    private int[] checked;
+    private int checkedNum;
+
+    public DeviceMonitorController(Handler handler, CheckboxManager checkboxManager, LineData lineData) {
         this.checkboxManager = checkboxManager;
         this.lineData = lineData;
         this.mHandler = handler;
-        this.drawer = draw;
 
         request = new RequestService(10);
     }
@@ -57,8 +57,15 @@ public class DeviceMonitorController {
 
     public void startDrawing() {
         // first initialize data
-        dataManager = new QueueManager(GlobalConfig.MAX_ITEMS_TO_SHOW);
-        lineData.addDataSet(lineDataSet);
+        checked = checkboxManager.getChecked();
+        checkedNum = checkboxManager.getCheckedNum();
+
+        dataManager = new QueueManager[checkedNum];
+        LineDataSet[] dataSets = new LineDataSet[checkedNum];
+        for (int i = 0; i < checkedNum; i++) {
+            dataManager[i] = new QueueManager();
+            dataSets[i] = new LineDataSet(dataManager[i].getEntries(), checkboxManager.getCorrespondingLabel(checked[i]));
+        }
 
         // start to request data from server using the thread, one piece at every second
         drawingThread = new ChartThread();
@@ -70,15 +77,15 @@ public class DeviceMonitorController {
         drawingThread = null;
 
         dataManager = null;
+        checked = null;
+        checkedNum = -1;
     }
 
 
     private class QueueManager {
         private LinkedList<Entry> entries;
-        private int maxItems;
 
-        public QueueManager(int maxItems) {
-            this.maxItems = maxItems;
+        public QueueManager() {
 
             entries = new LinkedList<>();
         }
@@ -88,10 +95,9 @@ public class DeviceMonitorController {
         }
 
         public void add(Entry entry) {
-            if (entries.size() < maxItems) {
+            if (entries.size() < GlobalConfig.MAX_ITEMS_TO_SHOW) {
                 entries.add(entry);
-            }
-            else {
+            } else {
                 entries.remove();
                 entries.add(entry);
             }
@@ -128,11 +134,17 @@ public class DeviceMonitorController {
             Log.i(TAG, "start: drawing thread running");
 
             while (run) {
-                int y = request.requestData();
-                dataManager.add(new Entry(GlobalConfig.MAX_ITEMS_TO_SHOW, y));
-                LineDataSet dataSet = new LineDataSet(dataManager.getEntries(), "test");
-                lineData.removeDataSet(0);
-                lineData.addDataSet(dataSet);
+                for (int i = 0; i < checkedNum; i++)
+                    lineData.removeDataSet(0);
+
+                for (int i = 0; i < checkedNum; i++) {
+                    int y = request.requestData();
+                    dataManager[i].add(new Entry(GlobalConfig.MAX_ITEMS_TO_SHOW, y));
+                    LineDataSet dataSet = new LineDataSet(dataManager[i].getEntries(), checkboxManager.getCorrespondingLabel(checked[i]));
+                    dataSet.setColor(checkboxManager.getCorrespondingColor(checked[i]));
+                    lineData.addDataSet(dataSet);
+                }
+
                 mHandler.sendEmptyMessage(DeviceMonitorActivity.HANDLER_UPDATE_CHART);
 
                 try {
