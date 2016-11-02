@@ -5,7 +5,6 @@ import android.intellhome.utils.CheckboxManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.BoolRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,16 +14,11 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 import com.zcw.togglebutton.ToggleButton;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * Created by Quentin on 31/10/2016.
@@ -32,9 +26,6 @@ import java.util.Random;
 public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
 
     public static final int HANDLER_UPDATE_CHART = 1;
-    public static final int HANDLER_START_DRAW = 2;
-    public static final int HANDLER_STOP_DRAW = 3;
-
 
     static final String TAG = "DeviceMonitorActivity";
 
@@ -44,7 +35,6 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
     // self-defined helper class
     CheckboxManager mCheckboxManager;
     DeviceMonitorController controller;
-
 
 
     // UI component
@@ -95,7 +85,7 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
                 toggleOn = !toggleOn;
                 mBT_switch.toggle();
 
-                if (toggleOn)
+                if (toggleOn && mCheckboxManager.isChecked())
                     startDrawChart();
                 else if (drawingChart)// the switch is turned off
                     stopDrawChart();
@@ -141,6 +131,8 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
         Log.i(TAG, "stopDrawChart: stop drawing chart");
         drawingChart = false;
 
+        controller.stopDrawing();
+
         mChart.clearValues();
         mChart.notifyDataSetChanged();
         mChart.invalidate();
@@ -160,17 +152,16 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
                     mCheckboxManager.checkToggle(CheckboxManager.CHECKBOX_VOLTAGE);
                     break;
             }
-            if (mCheckboxManager.getCurrentChecked() !=
-                    CheckboxManager.CHECKBOX_NO_SELECTION && !drawingChart) {
+
+            if (mCheckboxManager.isChecked() && !drawingChart) {
+                startDrawChart();
+            }
+            else if (mCheckboxManager.isChecked() && drawingChart) {
+                stopDrawChart();
                 startDrawChart();
             }
             else if (drawingChart)// all checkboxes are unselected
                 stopDrawChart();
-            else if (mCheckboxManager.getCurrentChecked() !=
-                    CheckboxManager.CHECKBOX_NO_SELECTION && drawingChart) {
-                stopDrawChart();
-                startDrawChart();
-            }
 
         }
     };
@@ -184,12 +175,6 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
                 case HANDLER_UPDATE_CHART:
                     mChart.notifyDataSetChanged();
                     mChart.invalidate();
-                    break;
-                case HANDLER_START_DRAW:
-                    startDrawChart();
-                    break;
-                case HANDLER_STOP_DRAW:
-                    stopDrawChart();
                     break;
             }
         }

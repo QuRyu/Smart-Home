@@ -2,7 +2,6 @@ package android.intellhome.utils;
 
 import android.widget.CheckBox;
 
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -32,20 +31,22 @@ public class CheckboxManager {
                 // toggle branch
                 currentChecked = -1;
                 checkboxes.get(i).setChecked(false);
-            }
-            else {
+            } else {
                 setAllOff();
                 checkboxes.get(i).setChecked(true);
                 currentChecked = i;
             }
-        }
-        else
+        } else
             throw new RuntimeException("key does not exist");
 
     }
 
     public int getCurrentChecked() {
         return currentChecked;
+    }
+
+    public boolean isChecked() {
+        return currentChecked != CHECKBOX_NO_SELECTION;
     }
 
     public String getCurrentLabel() {
@@ -62,7 +63,7 @@ public class CheckboxManager {
     }
 
     private void setAllOff() {
-        for (CheckBox cb: checkboxes.values())
+        for (CheckBox cb : checkboxes.values())
             cb.setChecked(false);
     }
 }

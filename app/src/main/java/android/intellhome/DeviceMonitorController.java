@@ -63,6 +63,7 @@ public class DeviceMonitorController {
     public void stopDrawing() {
 
         dataManager = null;
+
         drawingThread.interrupt();
         drawingThread = null;
     }
