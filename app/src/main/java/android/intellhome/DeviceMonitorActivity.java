@@ -90,6 +90,7 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
                 else if (drawingChart)// the switch is turned off
                     stopDrawChart();
 
+                controller.toggleSwitch(toggleOn);
             }
         });
 
@@ -153,9 +154,8 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
                     break;
             }
 
-            if (mCheckboxManager.isChecked() && !drawingChart) {
+            if (mCheckboxManager.isChecked() && !drawingChart)
                 startDrawChart();
-            }
             else if (mCheckboxManager.isChecked() && drawingChart) {
                 stopDrawChart();
                 startDrawChart();

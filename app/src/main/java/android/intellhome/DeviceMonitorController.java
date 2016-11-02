@@ -40,13 +40,18 @@ public class DeviceMonitorController {
         request = new RequestService(10);
     }
 
+    public void toggleSwitch(boolean switchOn) {
+        if (switchOn) switchTurnOn();
+        else switchTurnOff();
+    }
+
     // called when switch is turned off
-    public void switchTurnOff() {
+    private void switchTurnOff() {
 
     }
 
     // called when switch is turned on
-    public void switchTurnOn() {
+    private void switchTurnOn() {
 
     }
 
@@ -61,12 +66,12 @@ public class DeviceMonitorController {
     }
 
     public void stopDrawing() {
-
         dataManager = null;
 
         drawingThread.interrupt();
         drawingThread = null;
     }
+
 
     private class QueueManager {
         private LinkedList<Entry> entries;
@@ -93,9 +98,9 @@ public class DeviceMonitorController {
         }
 
         private void entriesDecrementByOne() {
-            for (Entry entry : entries) {
+            for (Entry entry : entries)
                 entry.setX(entry.getX() - 1);
-            }
+
         }
 
 
