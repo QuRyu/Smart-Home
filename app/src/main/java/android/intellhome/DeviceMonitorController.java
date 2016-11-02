@@ -88,13 +88,15 @@ public class DeviceMonitorController {
         }
 
         public void add(Entry entry) {
-            if (entries.size() < maxItems)
-                entries.add(entry);
-            else {
-                entries.remove();
-                entriesDecrementByOne();
+            if (entries.size() < maxItems) {
                 entries.add(entry);
             }
+            else {
+                entries.remove();
+                entries.add(entry);
+            }
+
+            entriesDecrementByOne();
         }
 
         private void entriesDecrementByOne() {
