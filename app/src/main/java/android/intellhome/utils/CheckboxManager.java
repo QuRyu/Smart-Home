@@ -16,7 +16,7 @@ public class CheckboxManager {
     public static final int CHECKBOX_VOLTAGE = 2;
     public static final int CHECKBOX_ELECTRICITY = 3;
 
-    
+
     private Map<Integer, ? extends CheckBox> checkboxes;
 
     private int currentChecked;

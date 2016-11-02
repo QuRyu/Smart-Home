@@ -27,13 +27,11 @@ import java.util.Random;
 /**
  * Created by Quentin on 31/10/2016.
  */
-public class DeviceMonitorActivity extends AppCompatActivity {
+public class DeviceMonitorActivity extends AppCompatActivity implements DeviceMonitorActivity.Draw{
+
+    public static final int HANDLER_UPDATE_CHART = 1;
 
     static final String TAG = "DeviceMonitorActivity";
-
-    static final int HANDLER_UPDATE_CHART = 1;
-
-    static final int maxItemsToShow = 10;
 
     private boolean toggleOn;
     private boolean drawingChart;
@@ -63,7 +61,7 @@ public class DeviceMonitorActivity extends AppCompatActivity {
     LineData lineData;
     LineDataSet lineDataSet;
     LineChart mChart;
-    LinkedList<Entry> queue;
+    LinkedList<Entry> entries;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -125,28 +123,33 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         mCheckboxManager = new CheckboxManager(map);
     }
 
-    private void startDrawChart() {
+    @Override
+    public void startDrawChart() {
         if (toggleOn && mCheckboxManager.getCurrentChecked() != CheckboxManager.CHECKBOX_NO_SELECTION) {
             Log.i(TAG, "startDrawChart: start to draw chart");
             drawingChart = true;
 
-            queue = new LinkedList<>();
+            entries = new LinkedList<>();
             drawingThread = new ChartThread();
 
             drawingThread.start();
         }
     }
 
-    private void stopDrawChart() {
+    @Override
+    public void stopDrawChart() {
         Log.i(TAG, "stopDrawChart: stop drawing chart");
         drawingChart = false;
 
         drawingThread.interrupt();
         drawingThread = null;
 
-        queue = null;
+        entries = null;
 
+        lineData.clearValues();
         mChart.clear();
+        mChart.notifyDataSetChanged();
+        mChart.invalidate();
     }
 
     private String getCheckboxLabel() {
@@ -176,58 +179,21 @@ public class DeviceMonitorActivity extends AppCompatActivity {
                     mCheckboxManager.checkToggle(CheckboxManager.CHECKBOX_VOLTAGE);
                     break;
             }
-            if (mCheckboxManager.getCurrentChecked() != CheckboxManager.CHECKBOX_NO_SELECTION && !drawingChart) {
+            if (mCheckboxManager.getCurrentChecked() !=
+                    CheckboxManager.CHECKBOX_NO_SELECTION && !drawingChart) {
                 startDrawChart();
             }
             else if (drawingChart)// all checkboxes are unselected
                 stopDrawChart();
-            else if (mCheckboxManager.getCurrentChecked() != CheckboxManager.CHECKBOX_NO_SELECTION && drawingChart) {
+            else if (mCheckboxManager.getCurrentChecked() !=
+                    CheckboxManager.CHECKBOX_NO_SELECTION && drawingChart) {
+
                 stopDrawChart();
                 startDrawChart();
             }
 
         }
     };
-
-
-    // TODO: 01/11/2016 use queue to add new elements
-    private class ChartThread extends Thread {
-
-        private boolean run = true;
-
-        public ChartThread() {
-
-        }
-
-        @Override
-        public synchronized void start() {
-            super.start();
-        }
-
-        @Override
-        public void run() {
-            super.run();
-            Log.i(TAG, "start: drawing thread running");
-            // initialize lineData and lineDataSet
-
-            while (run) {
-                mHandler.sendEmptyMessage(HANDLER_UPDATE_CHART);
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        @Override
-        public void interrupt() {
-            super.interrupt();
-            run = false;
-        }
-
-    }
 
 
     private Handler mHandler = new Handler() {
@@ -244,7 +210,7 @@ public class DeviceMonitorActivity extends AppCompatActivity {
 
                     int y = random.nextInt(10);
                     addNewEntry(y);
-                    LineDataSet lineDataSet = new LineDataSet(queue, getCheckboxLabel());
+                    LineDataSet lineDataSet = new LineDataSet(entries, getCheckboxLabel());
                     lineData.removeDataSet(0);
                     lineData.addDataSet(lineDataSet);
                     mChart.notifyDataSetChanged();
@@ -254,16 +220,8 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         }
     };
 
-
-    private void addNewEntry(int y) {
-        if (queue.size() < maxItemsToShow)
-            queue.add(new Entry(10, y));
-        else {
-            queue.remove();
-            for (Entry entry : queue) {
-                entry.setX(entry.getX()-1);
-            }
-            queue.add(new Entry(maxItemsToShow, y));
-        }
+    public interface Draw {
+        void startDrawChart();
+        void stopDrawChart();
     }
 }
