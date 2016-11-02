@@ -2,6 +2,8 @@ package android.intellhome.utils;
 
 import android.widget.CheckBox;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,53 +19,55 @@ public class CheckboxManager {
 
 
     private Map<Integer, ? extends CheckBox> checkboxes;
+    private boolean [] checked;
 
-    private int currentChecked;
 
     public CheckboxManager(Map<Integer, ? extends CheckBox> checkboxes) {
         this.checkboxes = checkboxes;
-        currentChecked = -1;
+        checked = new boolean[checkboxes.size()];
+
+        // initialize checked
+        for (int i=0; i<checked.length; i++)
+            checked[i] = false;
     }
 
     public void checkToggle(int i) {
         if (checkboxes.containsKey(i)) {
-            if (currentChecked == i) {
-                // toggle branch
-                currentChecked = -1;
+            if (checked[i]) { // the checkbox was checked, now un-check it
                 checkboxes.get(i).setChecked(false);
+                checked[i] = false;
             } else {
-                setAllOff();
+                checked[i] = true;
                 checkboxes.get(i).setChecked(true);
-                currentChecked = i;
             }
         } else
             throw new RuntimeException("key does not exist");
 
     }
 
-    public int getCurrentChecked() {
-        return currentChecked;
-    }
-
     public boolean isChecked() {
-        return currentChecked != CHECKBOX_NO_SELECTION;
+        for (boolean b: checked)
+            if (b)
+                return true;
+        return false;
     }
 
-    public String getCurrentLabel() {
-        switch (currentChecked) {
-            case CHECKBOX_CURRENT:
-                return "Current";
-            case CHECKBOX_ELECTRICITY:
-                return "Electricity";
-            case CHECKBOX_VOLTAGE:
-                return "Voltage";
-            default:
-                return "Default Label";
-        }
+    public int [] getChecked () {
+        if (!isChecked())
+            return null;
+
+        int [] result = new int[getCheckedNum()];
+        int index = 0;
+        for (int i=0; i<checked.length; ++i)
+            if (checked[i])
+                result[index++] = i;
+        return result;
     }
 
-    private void setAllOff() {
-        for (CheckBox cb : checkboxes.values())
-            cb.setChecked(false);
+    public int getCheckedNum() {
+        int result = 0;
+        for (boolean b: checked)
+            ++result;
+        return result;
     }
 }

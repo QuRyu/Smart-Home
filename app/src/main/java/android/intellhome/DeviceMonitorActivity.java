@@ -14,6 +14,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.LineData;
 import com.zcw.togglebutton.ToggleButton;
 
@@ -61,6 +62,11 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
 
         // initialize chart
         mChart = (LineChart) findViewById(R.id.linechart);
+        mChart.setDescription("");
+        mChart.getXAxis().setEnabled(false);
+        mChart.getAxisRight().setEnabled(false);
+        mChart.getLegend().setEnabled(false);
+
         lineData = new LineData();
         mChart.setData(lineData);
 
@@ -120,7 +126,7 @@ public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
 
     @Override
     public void startDrawChart() {
-        if (toggleOn && mCheckboxManager.getCurrentChecked() != CheckboxManager.CHECKBOX_NO_SELECTION) {
+        if (toggleOn && mCheckboxManager.isChecked()) {
             Log.i(TAG, "startDrawChart: start to draw chart");
             drawingChart = true;
             controller.startDrawing();
