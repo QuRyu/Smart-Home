@@ -5,6 +5,7 @@ import android.intellhome.utils.CheckboxManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.BoolRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,6 +20,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.zcw.togglebutton.ToggleButton;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -27,22 +29,23 @@ import java.util.Random;
 /**
  * Created by Quentin on 31/10/2016.
  */
-public class DeviceMonitorActivity extends AppCompatActivity implements DeviceMonitorActivity.Draw{
+public class DeviceMonitorActivity extends AppCompatActivity implements Draw {
 
     public static final int HANDLER_UPDATE_CHART = 1;
+    public static final int HANDLER_START_DRAW = 2;
+    public static final int HANDLER_STOP_DRAW = 3;
+
 
     static final String TAG = "DeviceMonitorActivity";
 
-    private boolean toggleOn;
+    private boolean toggleOn = false;
     private boolean drawingChart;
 
     // self-defined helper class
-    ChartThread drawingThread;
     CheckboxManager mCheckboxManager;
     DeviceMonitorController controller;
 
 
-    Random random;
 
     // UI component
     Button mBT_history;
@@ -59,21 +62,21 @@ public class DeviceMonitorActivity extends AppCompatActivity implements DeviceMo
 
     // chart
     LineData lineData;
-    LineDataSet lineDataSet;
     LineChart mChart;
-    LinkedList<Entry> entries;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_monitor);
 
-        random = new Random();
-        // initialize controller
-        controller = new DeviceMonitorController();
-
         // initialize chart
         mChart = (LineChart) findViewById(R.id.linechart);
+        lineData = new LineData();
+        mChart.setData(lineData);
+
+        // initialize controller
+        controller = new DeviceMonitorController(mHandler, this, mCheckboxManager, lineData);
+
 
         // initialize buttons
         mBT_history = (Button) findViewById(R.id.bt_history);
@@ -96,6 +99,7 @@ public class DeviceMonitorActivity extends AppCompatActivity implements DeviceMo
                     startDrawChart();
                 else if (drawingChart)// the switch is turned off
                     stopDrawChart();
+
             }
         });
 
@@ -128,11 +132,7 @@ public class DeviceMonitorActivity extends AppCompatActivity implements DeviceMo
         if (toggleOn && mCheckboxManager.getCurrentChecked() != CheckboxManager.CHECKBOX_NO_SELECTION) {
             Log.i(TAG, "startDrawChart: start to draw chart");
             drawingChart = true;
-
-            entries = new LinkedList<>();
-            drawingThread = new ChartThread();
-
-            drawingThread.start();
+            controller.startDrawing();
         }
     }
 
@@ -141,28 +141,9 @@ public class DeviceMonitorActivity extends AppCompatActivity implements DeviceMo
         Log.i(TAG, "stopDrawChart: stop drawing chart");
         drawingChart = false;
 
-        drawingThread.interrupt();
-        drawingThread = null;
-
-        entries = null;
-
-        lineData.clearValues();
-        mChart.clear();
+        mChart.clearValues();
         mChart.notifyDataSetChanged();
         mChart.invalidate();
-    }
-
-    private String getCheckboxLabel() {
-        switch (mCheckboxManager.getCurrentChecked()) {
-            case CheckboxManager.CHECKBOX_CURRENT:
-                return getString(R.string.current);
-            case CheckboxManager.CHECKBOX_ELECTRICITY:
-                return getString(R.string.electricity);
-            case CheckboxManager.CHECKBOX_VOLTAGE:
-                return getString(R.string.voltage);
-            default:
-                return "LABEL";
-        }
     }
 
     private View.OnClickListener checkboxListener = new View.OnClickListener() {
@@ -187,7 +168,6 @@ public class DeviceMonitorActivity extends AppCompatActivity implements DeviceMo
                 stopDrawChart();
             else if (mCheckboxManager.getCurrentChecked() !=
                     CheckboxManager.CHECKBOX_NO_SELECTION && drawingChart) {
-
                 stopDrawChart();
                 startDrawChart();
             }
@@ -202,26 +182,17 @@ public class DeviceMonitorActivity extends AppCompatActivity implements DeviceMo
             super.handleMessage(msg);
             switch (msg.what) {
                 case HANDLER_UPDATE_CHART:
-                    lineData = mChart.getLineData();
-                    if (lineData == null) {
-                        lineData = new LineData();
-                        mChart.setData(lineData);
-                    }
-
-                    int y = random.nextInt(10);
-                    addNewEntry(y);
-                    LineDataSet lineDataSet = new LineDataSet(entries, getCheckboxLabel());
-                    lineData.removeDataSet(0);
-                    lineData.addDataSet(lineDataSet);
                     mChart.notifyDataSetChanged();
                     mChart.invalidate();
+                    break;
+                case HANDLER_START_DRAW:
+                    startDrawChart();
+                    break;
+                case HANDLER_STOP_DRAW:
+                    stopDrawChart();
                     break;
             }
         }
     };
 
-    public interface Draw {
-        void startDrawChart();
-        void stopDrawChart();
-    }
 }

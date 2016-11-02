@@ -48,6 +48,19 @@ public class CheckboxManager {
         return currentChecked;
     }
 
+    public String getCurrentLabel() {
+        switch (currentChecked) {
+            case CHECKBOX_CURRENT:
+                return "Current";
+            case CHECKBOX_ELECTRICITY:
+                return "Electricity";
+            case CHECKBOX_VOLTAGE:
+                return "Voltage";
+            default:
+                return "Default Label";
+        }
+    }
+
     private void setAllOff() {
         for (CheckBox cb: checkboxes.values())
             cb.setChecked(false);
