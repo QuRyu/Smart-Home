@@ -1,5 +1,6 @@
 package android.intellhome.utils;
 
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.intellhome.R;
 import android.widget.CheckBox;
@@ -7,6 +8,8 @@ import android.widget.CheckBox;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.crypto.spec.DESedeKeySpec;
 
 /**
  * Created by Quentin on 31/10/2016.
@@ -18,6 +21,7 @@ public class CheckboxManager {
     public static final int CHECKBOX_CURRENT = 0;
     public static final int CHECKBOX_VOLTAGE = 1;
     public static final int CHECKBOX_ELECTRICITY = 2;
+    public static final int CHECKBOX_UNCHECKED = 3;
 
 
     private Map<Integer, ? extends CheckBox> checkboxes;
@@ -36,11 +40,13 @@ public class CheckboxManager {
     public void checkToggle(int i) {
         if (checkboxes.containsKey(i)) {
             if (checked[i]) { // the checkbox was checked, now un-check it
-                checkboxes.get(i).setChecked(false);
                 checked[i] = false;
-            } else {
+                checkboxes.get(i).setChecked(false);
+                checkboxes.get(i).setTextColor(getCorrespondingColor(CHECKBOX_UNCHECKED));
+            } else { // render the checkbox checked
                 checked[i] = true;
                 checkboxes.get(i).setChecked(true);
+                checkboxes.get(i).setTextColor(getCorrespondingColor(i));
             }
         } else
             throw new RuntimeException("key does not exist");
@@ -94,9 +100,22 @@ public class CheckboxManager {
                 return Color.parseColor("#FF5722");
             case CHECKBOX_VOLTAGE:
                 return Color.parseColor("#7E57C2");
-            default:
+            case CHECKBOX_UNCHECKED:
                 return Color.parseColor("#94181616");
+            default:
+                throw new Resources.NotFoundException("no corresponding color found");
         }
     }
 
+    public int findDifferenceAndReturn(int [] oldChecked) {
+        boolean [] prvChecked = new boolean[checkboxes.size()];
+        for (int i : oldChecked) {
+            prvChecked[i] = true;
+        }
+        for (int i = 0; i < checkboxes.size(); i++) {
+            if (prvChecked[i] != checked[i])
+                return i;
+        }
+        throw new Resources.NotFoundException("the checkbox has not changed");
+    }
 }

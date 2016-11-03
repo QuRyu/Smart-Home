@@ -63,6 +63,7 @@ public class DeviceMonitorActivity extends AppCompatActivity {
         // initialize chart
         mChart = (LineChart) findViewById(R.id.linechart);
         mChart.setDescription("");
+        mChart.getLegend().setEnabled(false);
         mChart.getXAxis().setEnabled(false);
         mChart.getAxisRight().setEnabled(false);
 
@@ -164,8 +165,7 @@ public class DeviceMonitorActivity extends AppCompatActivity {
             if (mCheckboxManager.isChecked() && !drawingChart)
                 startDrawChart();
             else if (mCheckboxManager.isChecked() && drawingChart) {
-                stopDrawChart();
-                startDrawChart();
+                controller.changeDrawing();
             }
             else if (drawingChart)// all checkboxes are unselected
                 stopDrawChart();

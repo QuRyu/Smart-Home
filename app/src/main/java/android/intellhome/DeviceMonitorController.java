@@ -8,8 +8,11 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -23,7 +26,7 @@ public class DeviceMonitorController {
     private LineData lineData;
     private Handler mHandler;
 
-    private QueueManager[] dataManager;
+    private Map<Integer, QueueManager> dataManager;
 
     private RequestCurrentData<Integer> request;
 
@@ -60,11 +63,11 @@ public class DeviceMonitorController {
         checked = checkboxManager.getChecked();
         checkedNum = checkboxManager.getCheckedNum();
 
-        dataManager = new QueueManager[checkedNum];
+        dataManager = new HashMap<>();
         LineDataSet[] dataSets = new LineDataSet[checkedNum];
         for (int i = 0; i < checkedNum; i++) {
-            dataManager[i] = new QueueManager();
-            dataSets[i] = new LineDataSet(dataManager[i].getEntries(), checkboxManager.getCorrespondingLabel(checked[i]));
+            dataManager.put(checked[i], new QueueManager());
+            dataSets[i] = new LineDataSet(dataManager.get(checked[i]).getEntries(), checkboxManager.getCorrespondingLabel(checked[i]));
         }
 
         // start to request data from server using the thread, one piece at every second
@@ -79,6 +82,39 @@ public class DeviceMonitorController {
         dataManager = null;
         checked = null;
         checkedNum = -1;
+    }
+
+    public void changeDrawing() {
+//        synchronized (drawingThread) {
+//            try {
+//                drawingThread.wait();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+
+
+//            Log.i(TAG, "changeDrawing: paused drawing thread");
+
+//        drawingThread.onPause();
+
+        synchronized (dataManager) {
+            int[] oldChecked = checked;
+            int oldNum = checkedNum;
+            checked = checkboxManager.getChecked(); // newChecked
+            checkedNum = checkboxManager.getCheckedNum(); // newCheckedNum
+
+            int diff = checkboxManager.findDifferenceAndReturn(oldChecked);
+
+            if (oldNum < checkedNum)
+                dataManager.put(diff, new QueueManager());
+            else
+                dataManager.remove(diff);
+        }
+
+//        drawingThread.onResume();
+//            drawingThread.notify();
+//            Log.i(TAG, "changeDrawing: drawing thread changed");
+//        }
     }
 
 
@@ -108,7 +144,6 @@ public class DeviceMonitorController {
         private void entriesDecrementByOne() {
             for (Entry entry : entries)
                 entry.setX(entry.getX() - 1);
-
         }
 
 
@@ -118,9 +153,14 @@ public class DeviceMonitorController {
     // later request
     private class ChartThread extends Thread {
 
-        private boolean run = true;
+        private boolean run;
+        private Object pauseLock;
+        private boolean paused;
 
         public ChartThread() {
+            pauseLock = new Object();
+            paused = false;
+            run = true;
         }
 
         @Override
@@ -134,18 +174,32 @@ public class DeviceMonitorController {
             Log.i(TAG, "start: drawing thread running");
 
             while (run) {
-                for (int i = 0; i < checkedNum; i++)
-                    lineData.removeDataSet(0);
 
-                for (int i = 0; i < checkedNum; i++) {
-                    int y = request.requestData();
-                    dataManager[i].add(new Entry(GlobalConfig.MAX_ITEMS_TO_SHOW, y));
-                    LineDataSet dataSet = new LineDataSet(dataManager[i].getEntries(), checkboxManager.getCorrespondingLabel(checked[i]));
-                    dataSet.setColor(checkboxManager.getCorrespondingColor(checked[i]));
-                    lineData.addDataSet(dataSet);
+                synchronized (dataManager) {
+                    for (int i = 0; i < checkedNum; i++)
+                        lineData.removeDataSet(0);
+
+                    for (int i = 0; i < checkedNum; i++) {
+                        int y = request.requestData();
+                        dataManager.get(checked[i]).add(new Entry(GlobalConfig.MAX_ITEMS_TO_SHOW, y));
+                        LineDataSet dataSet = new LineDataSet(dataManager.get(checked[i]).getEntries(), checkboxManager.getCorrespondingLabel(checked[i]));
+                        dataSet.setColor(checkboxManager.getCorrespondingColor(checked[i]));
+                        lineData.addDataSet(dataSet);
+                    }
+
+                    mHandler.sendEmptyMessage(DeviceMonitorActivity.HANDLER_UPDATE_CHART);
                 }
 
-                mHandler.sendEmptyMessage(DeviceMonitorActivity.HANDLER_UPDATE_CHART);
+//                 pause the thread when new queue is being added
+//                synchronized (pauseLock) {
+//                    while (paused) {
+//                        try {
+//                            pauseLock.wait();
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
 
                 try {
                     Thread.sleep(1000);
@@ -159,6 +213,19 @@ public class DeviceMonitorController {
         public void interrupt() {
             super.interrupt();
             run = false;
+        }
+
+        public void onPause() {
+            synchronized (pauseLock) {
+                paused = true;
+            }
+        }
+
+        public void onResume() {
+            synchronized (pauseLock) {
+                paused = false;
+                pauseLock.notifyAll();
+            }
         }
 
     }
