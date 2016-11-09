@@ -17,5 +17,6 @@
     <string name="device_name_switch">卧室智能开关</string>
 
     <string name="network_failure">网络故障，请稍后重试</string>
+    <string name="title_activity_animation">AnimationActivity</string>
 
 </resources>

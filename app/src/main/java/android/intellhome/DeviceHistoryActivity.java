@@ -63,9 +63,6 @@ public class DeviceHistoryActivity extends AppCompatActivity {
     private boolean isCheckboxSelected;
     private int flag_date;
 
-    // TODO: 20/10/2016 adjust chart according to data 
-    // TODO: 18/10/2016 improve mChart
-    // TODO: 24/10/2016 Error Date checking
     CombinedChart mChart;
 
     Button mBT_search;
@@ -74,12 +71,8 @@ public class DeviceHistoryActivity extends AppCompatActivity {
     EditText mET_EndDate;
 
     CheckBox mCB_Electricity;
-    CheckBox mCB_U;
-    CheckBox mCB_I;
-
-
-    String mMonths[] = {"Jan", "Feb", "Mar", "Apr",
-            "May", "June", "July", "Aug", "Spe", "Oct", "Nov", "Dec"};
+    CheckBox mCB_Voltage;
+    CheckBox mCB_Current;
 
     DeviceHistoryHistoryController controller;
 
@@ -103,10 +96,10 @@ public class DeviceHistoryActivity extends AppCompatActivity {
 
         mCB_Electricity = (CheckBox) findViewById(R.id.cb_electricity);
         mCB_Electricity.setOnClickListener(checkboxOnClickListener);
-        mCB_U = (CheckBox) findViewById(R.id.cb_U);
-        mCB_U.setOnClickListener(checkboxOnClickListener);
-        mCB_I = (CheckBox) findViewById(R.id.cb_current);
-        mCB_I.setOnClickListener(checkboxOnClickListener);
+        mCB_Voltage = (CheckBox) findViewById(R.id.cb_U);
+        mCB_Voltage.setOnClickListener(checkboxOnClickListener);
+        mCB_Current = (CheckBox) findViewById(R.id.cb_current);
+        mCB_Current.setOnClickListener(checkboxOnClickListener);
 
 
         mChart = (CombinedChart) findViewById(R.id.linechart);
@@ -198,9 +191,9 @@ public class DeviceHistoryActivity extends AppCompatActivity {
         // TODO: 31/10/2016 if circle is drawn, there could only be one line
         if (mCB_Electricity.isChecked())
             combinedData.setData(fillElectricityData(historyData, start, max));
-        if (mCB_I.isChecked())
+        if (mCB_Current.isChecked())
             combinedData.setData(fillCurrentData(historyData, start, max));
-        if (mCB_U.isChecked())
+        if (mCB_Voltage.isChecked())
             combinedData.setData(fillVoltageData(historyData, start, max));
 
     }
@@ -365,8 +358,8 @@ public class DeviceHistoryActivity extends AppCompatActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.cb_current:
-                    if (mCB_I.isChecked() && mCB_U.isChecked())
-                        mCB_U.setChecked(false);
+                    if (mCB_Current.isChecked() && mCB_Voltage.isChecked())
+                        mCB_Voltage.setChecked(false);
                     isCheckboxSelected = true;
                     drawChartAtResponseToCheckbox();
                     break;
@@ -375,8 +368,8 @@ public class DeviceHistoryActivity extends AppCompatActivity {
                     drawChartAtResponseToCheckbox();
                     break;
                 case R.id.cb_U:
-                    if (mCB_I.isChecked() && mCB_U.isChecked())
-                        mCB_I.setChecked(false);
+                    if (mCB_Current.isChecked() && mCB_Voltage.isChecked())
+                        mCB_Current.setChecked(false);
                     isCheckboxSelected = true;
                     drawChartAtResponseToCheckbox();
                     break;
