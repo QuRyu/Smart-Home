@@ -3,10 +3,12 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="white">#FAFAFA</color>
 
     <color name="current">#90CAF9</color>
     <color name="voltage">#7E57C2</color>
     <color name="electricity">#FF5722</color>
 
     <color name="divide_line">#94181616</color>
+    <color name="transparent">#00000000</color>
 </resources>
