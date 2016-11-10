@@ -12,7 +12,7 @@ import android.widget.TextView;
 import java.util.Random;
 
 /**
- * Created by Quentin on 09/11/2016.
+ * 自定义Dialog，用于播放动画.
  */
 public class CustomProgressDialog extends ProgressDialog {
 
@@ -25,9 +25,14 @@ public class CustomProgressDialog extends ProgressDialog {
     private AnimationDrawable mAnimation;
     private ImageView mImageView;
     private TextView mTextView;
-
-    private int count = 0;
-
+    
+    /**
+     * Constructor.
+     * @param context
+     * @param content TextView 显示内容
+     * @param id 播放动画文件id
+     * @param theme Dialog style id
+     */
     public CustomProgressDialog(Context context, String content, int id, int theme) {
         super(context, theme);
         this.mContext = context;
@@ -35,11 +40,12 @@ public class CustomProgressDialog extends ProgressDialog {
         this.mResid = id;
     }
 
+    /**
+     * 改变TexitView显示内容
+     * @param content
+     */
     public void setContent(String content) {
-        if (mTextView != null)
-            mTextView.setText(content);
-        else
-            throw new RuntimeException("TextView is not initialized");
+        mTextView.setText(content);
     }
 
     @Override
@@ -49,12 +55,18 @@ public class CustomProgressDialog extends ProgressDialog {
         initData();
     }
 
+    /**
+     * 初始化View
+     */
     private void initView() {
         setContentView(R.layout.animation_dialog);
         mTextView = (TextView) findViewById(R.id.tv_dialog);
         mImageView = (ImageView) findViewById(R.id.iv_dialog);
     }
 
+    /**
+     * 初始化View所显示内容，并开始播放动画
+     */
     private void initData() {
         mImageView.setBackgroundResource(mResid);
         mAnimation = (AnimationDrawable) mImageView.getBackground();
